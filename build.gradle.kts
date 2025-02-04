@@ -6,8 +6,7 @@ plugins {
 }
 
 kotlin {
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
+    js {
         browser {
             val rootDirPath = project.rootDir.path
             val projectDirPath = project.projectDir.path
@@ -26,7 +25,9 @@ kotlin {
     }
 
     sourceSets {
-
+        jsMain.dependencies {
+            implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.8.0")
+        }
         commonMain.dependencies {
         }
     }
