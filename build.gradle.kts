@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
@@ -26,7 +25,9 @@ kotlin {
 
     sourceSets {
         jsMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.8.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-html-js:0.12.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+            implementation(npm("localforage", "1.10.0"))
         }
         commonMain.dependencies {
         }

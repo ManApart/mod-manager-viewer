@@ -1,4 +1,6 @@
+
 rootProject.name = "mod-manager-viewer"
+
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
