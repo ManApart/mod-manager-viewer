@@ -2,7 +2,7 @@ package org.manapart
 
 import kotlinx.serialization.Serializable
 import org.manapart.LocalForage.config
-import org.w3c.dom.HTMLElement
+import org.manapart.pages.loadInitialData
 import kotlin.js.Promise
 
 @Serializable
@@ -36,28 +36,23 @@ data class Mod(
 )
 
 private var inMemoryStorage = InMemoryStorage()
-var characterCards: Map<String, HTMLElement> = mapOf()
+
+fun updateInMemoryStorage(newStorage: InMemoryStorage){
+    inMemoryStorage = newStorage
+}
 
 fun clearStorage(){
     inMemoryStorage = InMemoryStorage()
-    characterCards = mapOf()
 }
 
 fun resetStorage() {
     inMemoryStorage = InMemoryStorage()
-    characterCards = mapOf()
-//    loadExample(false).then {
-//        persistMemory()
-//    }
+    loadInitialData()
+
 }
 
-//fun getProfile(): Profile {
-//    return inMemoryStorage.profile
-//}
-//
-//fun saveProfile(profile: Profile) {
-//    inMemoryStorage.profile = profile
-//}
+fun getProfiles() = inMemoryStorage.profiles
+fun getMods() = inMemoryStorage.mods
 
 fun createDB() {
     config(LocalForageConfig("starfield-mod-manager"))
@@ -67,6 +62,9 @@ fun persistMemory() {
     LocalForage.setItem("memory", jsonMapper.encodeToString(inMemoryStorage))
 }
 
+fun hasMemory(): Promise<Boolean> {
+    return LocalForage.getItem("memory").then { persisted -> return@then persisted != null }
+}
 
 fun loadMemory(): Promise<*> {
     return LocalForage.getItem("memory").then { persisted ->
