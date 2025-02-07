@@ -10,19 +10,19 @@ import kotlin.js.Promise
 fun loadInitialData(): Promise<*> {
     return loadMemory().then {
         if (getMods().isNotEmpty()) {
-            println("Loaded Memory")
         } else {
-            println("Loading example")
             loadJson("exampleData.json").then { json ->
-                JSON.stringify(json)
-                    .let { jsonMapper.decodeFromString<InMemoryStorage>(it) }
-                    .let { updateInMemoryStorage(it) }
-                persistMemory()
+                loadFromJson(JSON.stringify(json))
             }.catch { e ->
                 println("Failed to load example data ${JSON.stringify(e)}")
             }
         }
     }
+}
+
+fun loadFromJson(json: String){
+    updateInMemoryStorage(jsonMapper.decodeFromString<InMemoryStorage>(json))
+    persistMemory()
 }
 
 

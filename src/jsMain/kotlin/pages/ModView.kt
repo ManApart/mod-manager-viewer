@@ -1,20 +1,23 @@
 package org.manapart.pages
 
 import kotlinx.html.id
-import kotlinx.html.js.div
-import kotlinx.html.js.h1
-import kotlinx.html.js.p
+import kotlinx.html.js.*
 import kotlinx.html.span
 import org.manapart.getMods
 import org.manapart.replaceElement
+import org.manapart.updateUrl
 
 fun modView() {
+    updateUrl("mods")
     replaceElement {
         div {
             id = "mods"
             h1 { +"Mod Viewer" }
             p { +"Upload your data.json to view your mod list on the go!" }
-            //TODO - link to upload page
+            button {
+                +"Upload"
+                onClickFunction = { uploadView()}
+            }
             div {
                 id = "header"
                 span("idStat") { +"Id" }
