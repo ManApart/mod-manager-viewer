@@ -1,8 +1,11 @@
 package org.manapart.pages
 
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 import kotlinx.html.id
 import kotlinx.html.js.*
 import kotlinx.html.span
+import org.manapart.el
 import org.manapart.getMods
 import org.manapart.replaceElement
 import org.manapart.updateUrl
@@ -16,7 +19,7 @@ fun modView() {
             p { +"Upload your data.json to view your mod list on the go!" }
             button {
                 +"Upload"
-                onClickFunction = { uploadView()}
+                onClickFunction = { uploadView() }
             }
             div {
                 id = "header"
@@ -26,13 +29,20 @@ fun modView() {
                 span("stat enabledStat") { +"Enabled" }
                 span("stat endorsedStat") { +"Endorsed" }
                 span("stat categoryStat") { +"Category" }
+                br {  }
             }
             getMods().forEach { mod ->
                 div("modRow") {
                     div("nameRow") {
-                        +mod.name
+                        +mod.name.capitalizeWords()
+                        onClickFunction = {
+                            val stats = el("${mod.id ?: mod.name}-stats-row")
+                            val toggle = !stats.className.contains("minimized")
+                            if (toggle) stats.addClass("minimized") else stats.removeClass("minimized")
+                        }
                     }
-                    div("statsRow") {
+                    div("statsRow minimized") {
+                        id = "${mod.id ?: mod.name}-stats-row"
                         span("idStat") { +(mod.id?.toString() ?: "?") }
                         //TODO - show update icon
                         span("stat versionStat") { +(mod.version ?: "?") }
@@ -49,3 +59,5 @@ fun modView() {
         }
     }
 }
+
+fun String.capitalizeWords() = this.split(" ").joinToString(" ") { it.capitalize() }
