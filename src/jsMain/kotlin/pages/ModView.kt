@@ -4,27 +4,25 @@ import kotlinx.browser.window
 import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
 import kotlinx.html.*
-import kotlinx.html.js.*
-import kotlinx.html.js.button
 import kotlinx.html.js.div
-import kotlinx.html.js.h1
-import kotlinx.html.js.hr
-import kotlinx.html.js.img
-import kotlinx.html.js.p
-import kotlinx.html.js.span
-import kotlinx.html.js.td
+import kotlinx.html.js.onClickFunction
+import kotlinx.html.js.onKeyUpFunction
 import kotlinx.html.js.tr
 import org.manapart.*
+import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
-import org.w3c.dom.HTMLInputElement
 
 const val THUMBS_UP = "\uD83D\uDC4D"
 const val THUMBS_DOWN = "\uD83D\uDC4E"
 const val ENABLED = "🔗"
 const val UPDATE = "\uD83D\uDCE9"
 
+private var modDoms = mapOf<String, Element>()
+private var mods = mapOf<String, Mod>()
+
 fun modView() {
     updateUrl("mods")
+    mods = getMods().associateBy { it.uniqueId() }
     replaceElement {
         div {
             id = "mods"
@@ -37,10 +35,11 @@ fun modView() {
                 }
                 +"your data.json to view your mod list on the go!"
             }
-            val mods = getMods().associateBy { it.uniqueId() }
-            controlsMenu(mods)
+
+            controlsMenu()
             mods.values.forEach { mod ->
                 div("modRow") {
+                    id = "mod-${mod.uniqueId()}"
                     val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
                     div("nameRow") {
                         val enabled = if (mod.enabled) ENABLED else ""
@@ -81,15 +80,19 @@ fun modView() {
             }
         }
     }
+    modDoms = mods.keys.associateWith { el("mod-$it") }
 }
 
-fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
+fun TagConsumer<HTMLElement>.controlsMenu() {
     div {
         id = "controls"
         div("control-row") {
             button {
                 img(classes = "icon", src = "./assets/collapse.svg") { }
                 +"Collapse"
+                onClickFunction = {
+                    mods.keys.forEach { el("$it-stats-row").addClass("minimized") }
+                }
             }
             button {
                 img(classes = "icon", src = "./assets/filter.svg") { }
