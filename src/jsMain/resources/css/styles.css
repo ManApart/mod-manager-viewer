@@ -147,14 +147,18 @@ table, th, td {
     left: 20px;
 }
 
-#header {
-    font-size: larger;
+#upload-button {
+    display: inline-block;
 }
 
 .statsRow{
     overflow: hidden;
-    max-height: 200px;
-    transition: max-height .5s;
+    max-height: 400px;
+    transition: max-height .3s;
+}
+
+.statsRowTable {
+    width: 50%;
 }
 
 .stat {
