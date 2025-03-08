@@ -159,6 +159,7 @@ table, th, td {
 
 .statsRowTable {
     width: 50%;
+    margin-bottom: 10px;
 }
 
 .stat {
@@ -168,6 +169,10 @@ table, th, td {
     min-width: 60px;
 }
 
+.idRow:hover {
+    color: var(--orange);
+    text-decoration: underline
+}
 
 .hidden {
     display: none !important;
