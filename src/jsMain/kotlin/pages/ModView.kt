@@ -32,11 +32,21 @@ fun modView() {
                 }
                 +"your data.json to view your mod list on the go!"
             }
-            hr {  }
+            hr { }
             getMods().forEach { mod ->
                 div("modRow") {
+                    val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
                     div("nameRow") {
-                        +mod.name.capitalizeWords()
+                        val enabled = if (mod.enabled) ENABLED else ""
+                        val endorsed = when (mod.endorsed) {
+                            true -> THUMBS_UP
+                            false -> THUMBS_DOWN
+                            else -> ""
+                        }
+
+                        span("modName") { +mod.name.capitalizeWords() }
+                        span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
+
                         onClickFunction = {
                             val stats = el("${mod.id ?: mod.name}-stats-row")
                             val toggle = !stats.className.contains("minimized")
@@ -50,18 +60,11 @@ fun modView() {
                             tr("idRow") {
                                 td { +"Id" }
                                 td { +(mod.id?.toString() ?: "?") }
-                                onClickFunction = { window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank")}
+                                onClickFunction = { window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank") }
                             }
 
-                            val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
                             tableRow("Version", needsUpdate + (mod.version ?: "?"))
                             tableRow("Load Order", mod.loadOrder.toString())
-                            tableRow("Enabled", if (mod.enabled) ENABLED else "")
-                            tableRow("Endorsed", when (mod.endorsed) {
-                                true -> THUMBS_UP
-                                false -> THUMBS_DOWN
-                                else -> ""
-                            })
                             tableRow("Category", mod.categoryId?.toString() ?: "")
                             val tagContent = if (mod.tags.isNotEmpty()) mod.tags.joinToString() else ""
                             tableRow("Tags", tagContent)
