@@ -141,6 +141,13 @@ table, th, td {
     padding: 10px;
 }
 
+input {
+    color: white;
+    background-color: var(--background-blue);
+    border: 1px solid gray;
+    height: 30px;
+}
+
 .home-button {
     position: sticky;
     top: 20px;
@@ -149,6 +156,19 @@ table, th, td {
 
 #upload-button {
     display: inline-block;
+}
+
+#controls {
+    top: 0px;
+    position: sticky;
+    background-color: var(--background-blue);
+    padding-bottom: 5px;
+}
+
+.search {
+    display: inline-block;
+    position: relative;
+    width: 70%;
 }
 
 .modRow {
@@ -190,7 +210,7 @@ table, th, td {
     min-width: 60px;
 }
 
-.idRow:hover {
+.externalLink:hover {
     color: var(--orange);
     text-decoration: underline
 }

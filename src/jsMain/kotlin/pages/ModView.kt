@@ -5,13 +5,12 @@ import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
 import kotlinx.html.TagConsumer
 import kotlinx.html.id
+import kotlinx.html.input
 import kotlinx.html.js.*
 import kotlinx.html.table
-import org.manapart.el
-import org.manapart.getMods
-import org.manapart.replaceElement
-import org.manapart.updateUrl
+import org.manapart.*
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLInputElement
 
 const val THUMBS_UP = "\uD83D\uDC4D"
 const val THUMBS_DOWN = "\uD83D\uDC4E"
@@ -32,8 +31,9 @@ fun modView() {
                 }
                 +"your data.json to view your mod list on the go!"
             }
-            hr { }
-            getMods().forEach { mod ->
+            val mods = getMods().associateBy { it.uniqueId() }
+            controlsMenu(mods)
+            mods.values.forEach { mod ->
                 div("modRow") {
                     val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
                     div("nameRow") {
@@ -48,7 +48,7 @@ fun modView() {
                         span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
 
                         onClickFunction = {
-                            val stats = el("${mod.id ?: mod.name}-stats-row")
+                            val stats = el("${mod.uniqueId()}-stats-row")
                             val toggle = !stats.className.contains("minimized")
                             if (toggle) stats.addClass("minimized") else stats.removeClass("minimized")
                         }
@@ -57,10 +57,11 @@ fun modView() {
                         id = "${mod.id ?: mod.name}-stats-row"
 
                         table("statsRowTable") {
-                            tr("idRow") {
+                            val externalLink = if (mod.id != null) " externalLink" else ""
+                            tr("idRow$externalLink") {
                                 td { +"Id" }
                                 td { +(mod.id?.toString() ?: "?") }
-                                onClickFunction = { window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank") }
+                                onClickFunction = { if (mod.id != null) window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank") }
                             }
 
                             tableRow("Version", needsUpdate + (mod.version ?: "?"))
@@ -73,6 +74,32 @@ fun modView() {
                 }
             }
         }
+    }
+}
+
+fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
+    div {
+        id = "controls"
+        div {
+            button { +"Alpha" }
+            button { +"Load" }
+            button { +"Category" }
+            button { +"Enabled" }
+            button { +"Endorsed" }
+        }
+        div {
+            +"Search: "
+            input(classes = "search") {
+                id = "search"
+                placeholder = "Filter: Name, Categories, Tags. Comma separated"
+                value = ""
+                onKeyUpFunction = {
+//                    planetSearchOptions.searchText = el<HTMLInputElement>("search").value
+//                    searchPlanets()
+                }
+            }
+        }
+        hr { }
     }
 }
 

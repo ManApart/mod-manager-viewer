@@ -33,7 +33,11 @@ data class Mod(
     var categoryId: Int? = null,
     var endorsed: Boolean? = null,
     val tags: MutableSet<String> = mutableSetOf(),
-)
+) {
+    fun uniqueId(): String {
+        return id?.toString() ?: fileId?.toString() ?: name
+    }
+}
 
 private var inMemoryStorage = InMemoryStorage()
 
