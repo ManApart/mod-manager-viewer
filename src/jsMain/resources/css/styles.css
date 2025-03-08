@@ -148,10 +148,19 @@ input {
     height: 30px;
 }
 
+.icon {
+    width: 15px;
+    margin-right: 2px;
+}
+
 .home-button {
     position: sticky;
     top: 20px;
     left: 20px;
+}
+
+.control-row {
+    margin-bottom: 5px;
 }
 
 #upload-button {

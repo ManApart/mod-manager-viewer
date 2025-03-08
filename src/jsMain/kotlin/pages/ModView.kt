@@ -3,11 +3,17 @@ package org.manapart.pages
 import kotlinx.browser.window
 import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
-import kotlinx.html.TagConsumer
-import kotlinx.html.id
-import kotlinx.html.input
+import kotlinx.html.*
 import kotlinx.html.js.*
-import kotlinx.html.table
+import kotlinx.html.js.button
+import kotlinx.html.js.div
+import kotlinx.html.js.h1
+import kotlinx.html.js.hr
+import kotlinx.html.js.img
+import kotlinx.html.js.p
+import kotlinx.html.js.span
+import kotlinx.html.js.td
+import kotlinx.html.js.tr
 import org.manapart.*
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
@@ -80,14 +86,35 @@ fun modView() {
 fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
     div {
         id = "controls"
-        div {
-            button { +"Alpha" }
-            button { +"Load" }
-            button { +"Category" }
-            button { +"Enabled" }
-            button { +"Endorsed" }
+        div("control-row") {
+            button {
+                img(classes = "icon", src = "./assets/collapse.svg") { }
+                +"Collapse"
+            }
+            button {
+                img(classes = "icon", src = "./assets/filter.svg") { }
+                +"Enabled"
+            }
+            button {
+                img(classes = "icon", src = "./assets/filter.svg") { }
+                +"Endorsed"
+            }
         }
-        div {
+        div("control-row") {
+            button {
+                img(classes = "icon", src = "./assets/sort.svg") { }
+                +"Alpha"
+            }
+            button {
+                img(classes = "icon", src = "./assets/sort.svg") { }
+                +"Load"
+            }
+            button {
+                img(classes = "icon", src = "./assets/sort.svg") { }
+                +"Category"
+            }
+        }
+        div("control-row") {
             +"Search: "
             input(classes = "search") {
                 id = "search"
