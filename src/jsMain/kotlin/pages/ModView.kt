@@ -20,6 +20,18 @@ const val UPDATE = "\uD83D\uDCE9"
 private var modDoms = mapOf<String, Element>()
 private var mods = mapOf<String, Mod>()
 
+private enum class FilterState(val show: (Boolean?) -> Boolean) {
+    ONLY({ it == true }),
+    NONE({ it != true }),
+    ANY({ true });
+
+    fun next() = when (this) {
+        ONLY -> NONE
+        NONE -> ANY
+        ANY -> ONLY
+    }
+}
+
 fun modView() {
     updateUrl("mods")
     mods = getMods().associateBy { it.uniqueId() }
@@ -60,6 +72,11 @@ fun modView() {
                     }
                     div("statsRow minimized") {
                         id = "${mod.id ?: mod.name}-stats-row"
+                        button { +"Remove" }
+                        span {
+                            +"Todo"
+                            checkBoxInput { }
+                        }
 
                         table("statsRowTable") {
                             val externalLink = if (mod.id != null) " externalLink" else ""
@@ -97,10 +114,28 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
             button {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Enabled"
+                var filter = FilterState.ANY
+                onClickFunction = {
+                    filter = filter.next()
+                    mods.forEach { (id, mod) ->
+                        modDoms[id]?.let { e ->
+                            if (filter.show(mod.enabled)) e.removeClass("hidden") else e.addClass("hidden")
+                        }
+                    }
+                }
             }
             button {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Endorsed"
+                var filter = FilterState.ANY
+                onClickFunction = {
+                    filter = filter.next()
+                    mods.forEach { (id, mod) ->
+                        modDoms[id]?.let { e ->
+                            if (filter.show(mod.endorsed)) e.removeClass("hidden") else e.addClass("hidden")
+                        }
+                    }
+                }
             }
         }
         div("control-row") {
