@@ -9,6 +9,7 @@ import kotlin.js.Promise
 data class InMemoryStorage(
     var mods: List<Mod> = listOf(),
     var profiles: List<Profile> = listOf(),
+    val changes: Changes = Changes(),
 )
 
 @Serializable
@@ -39,6 +40,13 @@ data class Mod(
     }
 }
 
+@Serializable
+data class Changes(
+    val adds: MutableSet<String> = mutableSetOf(),
+    val deletes: MutableSet<String> = mutableSetOf(),
+    val tags: MutableMap<String, List<String>> = mutableMapOf()
+)
+
 private var inMemoryStorage = InMemoryStorage()
 
 fun updateInMemoryStorage(newStorage: InMemoryStorage){
@@ -57,6 +65,7 @@ fun resetStorage() {
 
 fun getProfiles() = inMemoryStorage.profiles
 fun getMods() = inMemoryStorage.mods
+fun getChanges() = inMemoryStorage.changes
 
 fun createDB() {
     config(LocalForageConfig("starfield-mod-manager"))

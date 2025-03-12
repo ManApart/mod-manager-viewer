@@ -49,48 +49,58 @@ fun modView() {
             }
 
             controlsMenu()
-            mods.values.forEach { mod ->
-                div("modRow") {
-                    id = "mod-${mod.uniqueId()}"
-                    val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
-                    div("nameRow") {
-                        val enabled = if (mod.enabled) ENABLED else ""
-                        val endorsed = when (mod.endorsed) {
-                            true -> THUMBS_UP
-                            false -> THUMBS_DOWN
-                            else -> ""
-                        }
-
-                        span("modName") { +mod.name.capitalizeWords() }
-                        span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
-
-                        onClickFunction = {
-                            val stats = el("${mod.uniqueId()}-stats-row")
-                            val toggle = !stats.className.contains("minimized")
-                            if (toggle) stats.addClass("minimized") else stats.removeClass("minimized")
-                        }
-                    }
-                    div("statsRow minimized") {
-                        id = "${mod.id ?: mod.name}-stats-row"
-                        button { +"Remove" }
-                        span {
-                            +"Todo"
-                            checkBoxInput { }
-                        }
-
-                        table("statsRowTable") {
-                            val externalLink = if (mod.id != null) " externalLink" else ""
-                            tr("idRow$externalLink") {
-                                td { +"Id" }
-                                td { +(mod.id?.toString() ?: "?") }
-                                onClickFunction = { if (mod.id != null) window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank") }
+            div {
+                id = "mod-list"
+                mods.values.forEach { mod ->
+                    div("modRow") {
+                        id = "mod-${mod.uniqueId()}"
+                        val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
+                        div("nameRow") {
+                            val enabled = if (mod.enabled) ENABLED else ""
+                            val endorsed = when (mod.endorsed) {
+                                true -> THUMBS_UP
+                                false -> THUMBS_DOWN
+                                else -> ""
                             }
 
-                            tableRow("Version", needsUpdate + (mod.version ?: "?"))
-                            tableRow("Load Order", mod.loadOrder.toString())
-                            tableRow("Category", mod.categoryId?.toString() ?: "")
-                            val tagContent = if (mod.tags.isNotEmpty()) mod.tags.joinToString() else ""
-                            tableRow("Tags", tagContent)
+                            span("modName") { +mod.name.capitalizeWords() }
+                            span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
+
+                            onClickFunction = {
+                                val stats = el("${mod.uniqueId()}-stats-row")
+                                val toggle = !stats.className.contains("minimized")
+                                if (toggle) stats.addClass("minimized") else stats.removeClass("minimized")
+                            }
+                        }
+                        div("statsRow minimized") {
+                            id = "${mod.uniqueId()}-stats-row"
+                            button {
+                                +"Remove"
+                                onClickFunction = {
+                                    getChanges().deletes.add(mod.uniqueId())
+                                    el("mod-${mod.uniqueId()}").addClass("hidden")
+                                    persistMemory()
+                                }
+                            }
+                            span {
+                                +"Todo"
+                                checkBoxInput { }
+                            }
+
+                            table("statsRowTable") {
+                                val externalLink = if (mod.id != null) " externalLink" else ""
+                                tr("idRow$externalLink") {
+                                    td { +"Id" }
+                                    td { +(mod.id?.toString() ?: "?") }
+                                    onClickFunction = { if (mod.id != null) window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank") }
+                                }
+
+                                tableRow("Version", needsUpdate + (mod.version ?: "?"))
+                                tableRow("Load Order", mod.loadOrder.toString())
+                                tableRow("Category", mod.categoryId?.toString() ?: "")
+                                val tagContent = if (mod.tags.isNotEmpty()) mod.tags.joinToString() else ""
+                                tableRow("Tags", tagContent)
+                            }
                         }
                     }
                 }
@@ -117,10 +127,8 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
                 var filter = FilterState.ANY
                 onClickFunction = {
                     filter = filter.next()
-                    mods.forEach { (id, mod) ->
-                        modDoms[id]?.let { e ->
-                            if (filter.show(mod.enabled)) e.removeClass("hidden") else e.addClass("hidden")
-                        }
+                    mods.values.forEach { mod ->
+                        showMod(mod, filter.show(mod.enabled))
                     }
                 }
             }
@@ -130,10 +138,8 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
                 var filter = FilterState.ANY
                 onClickFunction = {
                     filter = filter.next()
-                    mods.forEach { (id, mod) ->
-                        modDoms[id]?.let { e ->
-                            if (filter.show(mod.endorsed)) e.removeClass("hidden") else e.addClass("hidden")
-                        }
+                    mods.values.forEach { mod ->
+                        showMod(mod, filter.show(mod.endorsed))
                     }
                 }
             }
@@ -142,6 +148,17 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
             button {
                 img(classes = "icon", src = "./assets/sort.svg") { }
                 +"Alpha"
+//                el("mod").append(modDoms.values.first())
+                onClickFunction = {
+                    replaceElement("mod-list"){
+                        div {
+                            id = "mod-list"
+                            modDoms.values.forEach { mod ->
+                                //todo - append mod dom
+                            }
+                        }
+                    }
+                }
             }
             button {
                 img(classes = "icon", src = "./assets/sort.svg") { }
@@ -165,6 +182,13 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
             }
         }
         hr { }
+    }
+}
+
+fun showMod(mod: Mod, display: Boolean){
+    val id = mod.uniqueId()
+    modDoms[id]?.let { e ->
+        if (display && !getChanges().adds.contains(id)) e.removeClass("hidden") else e.addClass("hidden")
     }
 }
 
