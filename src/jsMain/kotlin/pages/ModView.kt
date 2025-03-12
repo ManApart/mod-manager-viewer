@@ -6,7 +6,6 @@ import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.div
 import kotlinx.html.js.onClickFunction
-import kotlinx.html.js.onKeyUpFunction
 import kotlinx.html.js.tr
 import org.manapart.*
 import org.w3c.dom.Element
@@ -19,18 +18,6 @@ const val UPDATE = "\uD83D\uDCE9"
 
 private var modDoms = mapOf<String, Element>()
 private var mods = mapOf<String, Mod>()
-
-private enum class FilterState(val show: (Boolean?) -> Boolean) {
-    ONLY({ it == true }),
-    NONE({ it != true }),
-    ANY({ true });
-
-    fun next() = when (this) {
-        ONLY -> NONE
-        NONE -> ANY
-        ANY -> ONLY
-    }
-}
 
 fun modView() {
     updateUrl("mods")
@@ -48,11 +35,12 @@ fun modView() {
                 +"your data.json to view your mod list on the go!"
             }
 
-            controlsMenu()
+            controlsMenu(mods, modDoms)
             div {
                 id = "mod-list"
                 mods.values.forEach { mod ->
-                    div("modRow") {
+                    val classes = if(getChanges().deletes.contains(mod.uniqueId())) "hidden modRow" else "modRow"
+                    div(classes) {
                         id = "mod-${mod.uniqueId()}"
                         val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
                         div("nameRow") {
@@ -108,81 +96,6 @@ fun modView() {
         }
     }
     modDoms = mods.keys.associateWith { el("mod-$it") }
-}
-
-fun TagConsumer<HTMLElement>.controlsMenu() {
-    div {
-        id = "controls"
-        div("control-row") {
-            button {
-                img(classes = "icon", src = "./assets/collapse.svg") { }
-                +"Collapse"
-                onClickFunction = {
-                    mods.keys.forEach { el("$it-stats-row").addClass("minimized") }
-                }
-            }
-            button {
-                img(classes = "icon", src = "./assets/filter.svg") { }
-                +"Enabled"
-                var filter = FilterState.ANY
-                onClickFunction = {
-                    filter = filter.next()
-                    mods.values.forEach { mod ->
-                        showMod(mod, filter.show(mod.enabled))
-                    }
-                }
-            }
-            button {
-                img(classes = "icon", src = "./assets/filter.svg") { }
-                +"Endorsed"
-                var filter = FilterState.ANY
-                onClickFunction = {
-                    filter = filter.next()
-                    mods.values.forEach { mod ->
-                        showMod(mod, filter.show(mod.endorsed))
-                    }
-                }
-            }
-        }
-        div("control-row") {
-            button {
-                img(classes = "icon", src = "./assets/sort.svg") { }
-                +"Alpha"
-//                el("mod").append(modDoms.values.first())
-                onClickFunction = {
-                    replaceElement("mod-list"){
-                        div {
-                            id = "mod-list"
-                            modDoms.values.forEach { mod ->
-                                //todo - append mod dom
-                            }
-                        }
-                    }
-                }
-            }
-            button {
-                img(classes = "icon", src = "./assets/sort.svg") { }
-                +"Load"
-            }
-            button {
-                img(classes = "icon", src = "./assets/sort.svg") { }
-                +"Category"
-            }
-        }
-        div("control-row") {
-            +"Search: "
-            input(classes = "search") {
-                id = "search"
-                placeholder = "Filter: Name, Categories, Tags. Comma separated"
-                value = ""
-                onKeyUpFunction = {
-//                    planetSearchOptions.searchText = el<HTMLInputElement>("search").value
-//                    searchPlanets()
-                }
-            }
-        }
-        hr { }
-    }
 }
 
 fun showMod(mod: Mod, display: Boolean){
