@@ -34,12 +34,12 @@ fun modView() {
                 }
                 +"your data.json to view your mod list on the go!"
             }
-
+            div { id = "changes" }
             controlsMenu(mods, modDoms)
             div {
                 id = "mod-list"
                 mods.values.forEach { mod ->
-                    val classes = if(getChanges().deletes.contains(mod.uniqueId())) "hidden modRow" else "modRow"
+                    val classes = if (getChanges().deletes.contains(mod.uniqueId())) "hidden modRow" else "modRow"
                     div(classes) {
                         id = "mod-${mod.uniqueId()}"
                         val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
@@ -67,6 +67,7 @@ fun modView() {
                                 onClickFunction = {
                                     getChanges().deletes.add(mod.uniqueId())
                                     el("mod-${mod.uniqueId()}").addClass("hidden")
+                                    changesView()
                                     persistMemory()
                                 }
                             }
@@ -96,9 +97,10 @@ fun modView() {
         }
     }
     modDoms = mods.keys.associateWith { el("mod-$it") }
+    changesView()
 }
 
-fun showMod(mod: Mod, display: Boolean){
+fun showMod(mod: Mod, display: Boolean) {
     val id = mod.uniqueId()
     modDoms[id]?.let { e ->
         if (display && !getChanges().adds.contains(id)) e.removeClass("hidden") else e.addClass("hidden")
