@@ -15,7 +15,7 @@ const val THUMBS_DOWN = "\uD83D\uDC4E"
 const val ENABLED = "🔗"
 const val UPDATE = "\uD83D\uDCE9"
 
-private var modDoms = mapOf<String, Element>()
+var modDoms = mapOf<String, Element>()
 private var mods = mapOf<String, Mod>()
 
 fun modListView() {
@@ -32,7 +32,7 @@ fun modListView() {
             +"your data.json to view your mod list on the go!"
         }
         div { id = "changes" }
-        controlsMenu(mods, modDoms)
+        controlsMenu(mods)
         div {
             id = "mod-list"
             mods.values.forEach { modView(it) }

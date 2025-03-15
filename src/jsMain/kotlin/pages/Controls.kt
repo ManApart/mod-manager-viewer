@@ -8,6 +8,7 @@ import kotlinx.html.js.onKeyUpFunction
 import org.manapart.*
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
+import org.w3c.dom.HTMLInputElement
 import org.w3c.xhr.JSON
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
@@ -26,7 +27,7 @@ private enum class FilterState(val show: (Boolean?) -> Boolean) {
     }
 }
 
-fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>, modDoms: Map<String, Element>) {
+fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
     div {
         id = "controls"
         div("control-row") {
@@ -89,8 +90,7 @@ fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>, modDoms: Map<S
                 placeholder = "Filter: Name, Categories, Tags. Comma separated"
                 value = ""
                 onKeyUpFunction = {
-//                    planetSearchOptions.searchText = el<HTMLInputElement>("search").value
-//                    searchPlanets()
+                    searchMods(mods, el<HTMLInputElement>("search").value)
                 }
             }
         }

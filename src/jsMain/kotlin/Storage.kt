@@ -38,6 +38,11 @@ data class Mod(
     fun uniqueId(): String {
         return id?.toString() ?: fileId?.toString() ?: name
     }
+    fun category(): String? {
+        //TODO - allow config uploading for category mappings
+        return null
+//        return categoryId?.let { toolConfig.categories[it] }
+    }
 }
 
 @Serializable
