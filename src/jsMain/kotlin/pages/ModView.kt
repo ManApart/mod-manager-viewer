@@ -125,23 +125,36 @@ private fun tagModal(mod: Mod) {
                 button {
                     +option
                     onClickFunction = {
-                        val added = getChanges().tagsAdded
-                        if (added[mod.uniqueId()] == null) added[mod.uniqueId()] = mutableSetOf()
-                        added[mod.uniqueId()]?.add(option)
+                        addTag(mod, option)
                         refreshTags(mod)
                         replaceElement("tag-modal") {}
                         el("mod-list").removeClass("blur")
-                        persistMemory()
+                    }
+                }
+            }
+            span {
+                id = "add-tag"
+                input(InputType.text) {
+                    id = "add-tag-input"
+                    placeholder = "New Tag"
+                }
+                button {
+                    +"+"
+                    onClickFunction = {
+                        val newTag = el<HTMLInputElement>("add-tag-input").value
+                        if (newTag.isNotBlank()) {
+                            addTag(mod, newTag)
+                            refreshTags(mod)
+                        }
                     }
                 }
             }
         }
     }
-    //TODO - add custom new entry
     el("mod-list").addClass("blur")
     val root = el<HTMLDivElement>("root")
     root.onclick = { event ->
-        if (event.target !is HTMLButtonElement){
+        if (event.target !is HTMLButtonElement && event.target !is HTMLInputElement){
             root.onclick = "".asDynamic()
             replaceElement("tag-modal") {}
             el("mod-list").removeClass("blur")
