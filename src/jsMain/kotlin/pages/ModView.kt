@@ -8,6 +8,8 @@ import kotlinx.html.js.div
 import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.tr
 import org.manapart.*
+import org.w3c.dom.HTMLButtonElement
+import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 
@@ -62,7 +64,12 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                 tr("idRow$externalLink") {
                     td { +"Id" }
                     td { +(mod.id?.toString() ?: "?") }
-                    onClickFunction = { if (mod.id != null) window.open("https://www.nexusmods.com/starfield/mods/${mod.id}", "_blank") }
+                    onClickFunction = {
+                        if (mod.id != null) window.open(
+                            "https://www.nexusmods.com/starfield/mods/${mod.id}",
+                            "_blank"
+                        )
+                    }
                 }
 
                 tableRow("Version", needsUpdate + (mod.version ?: "?"))
@@ -108,21 +115,36 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
     }
 }
 
-private fun tagModal(mod: Mod) = replaceElement("tag-modal") {
-    //TODO - get tags at memory read, include changes tags
-    val tagChoices = getMods().flatMap { it.tags }.toSet()
-    tagChoices.forEach { option ->
-        button {
-            +option
-            onClickFunction = {
-                val added = getChanges().tagsAdded
-                if (added[mod.uniqueId()] == null) added[mod.uniqueId()] = mutableSetOf()
-                added[mod.uniqueId()]?.add(option)
-                refreshTags(mod)
-                replaceElement("tag-modal") {}
-                persistMemory()
+private fun tagModal(mod: Mod) {
+    replaceElement("tag-modal") {
+        val excluded = mod.tags + (getChanges().tagsAdded[mod.uniqueId()] ?: setOf())
+        val tagChoices = (getMods().flatMap { it.tags } + getChanges().tagsAdded.values.flatten()).toSet() - excluded
+        div {
+            id = "tag-modal-content"
+            tagChoices.forEach { option ->
+                button {
+                    +option
+                    onClickFunction = {
+                        val added = getChanges().tagsAdded
+                        if (added[mod.uniqueId()] == null) added[mod.uniqueId()] = mutableSetOf()
+                        added[mod.uniqueId()]?.add(option)
+                        refreshTags(mod)
+                        replaceElement("tag-modal") {}
+                        el("mod-list").removeClass("blur")
+                        persistMemory()
+                    }
+                }
             }
         }
     }
     //TODO - add custom new entry
+    el("mod-list").addClass("blur")
+    val root = el<HTMLDivElement>("root")
+    root.onclick = { event ->
+        if (event.target !is HTMLButtonElement){
+            root.onclick = "".asDynamic()
+            replaceElement("tag-modal") {}
+            el("mod-list").removeClass("blur")
+        }
+    }
 }
