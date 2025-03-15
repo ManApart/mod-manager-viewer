@@ -2,7 +2,6 @@ package org.manapart.pages
 
 import kotlinx.browser.document
 import kotlinx.html.InputType
-import kotlinx.html.classes
 import kotlinx.html.id
 import kotlinx.html.js.*
 import org.manapart.replaceElement
@@ -26,7 +25,7 @@ fun uploadView() {
                         val reader = FileReader()
                         reader.onload = {
                             loadFromJson(reader.result as String)
-                            modView()
+                            modListView()
                         }
                         reader.onerror = { error ->
                             console.error("Failed to read File $error")

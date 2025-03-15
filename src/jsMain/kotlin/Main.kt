@@ -7,7 +7,7 @@ import kotlinx.dom.createElement
 import kotlinx.html.TagConsumer
 import kotlinx.html.dom.append
 import org.manapart.pages.loadInitialData
-import org.manapart.pages.modView
+import org.manapart.pages.modListView
 import org.manapart.pages.uploadView
 import org.w3c.dom.HTMLElement
 
@@ -34,7 +34,7 @@ fun main() {
 fun doRouting(windowHash: String = window.location.hash) {
     when {
         windowHash.startsWith("#upload") -> uploadView()
-        else -> modView()
+        else -> modListView()
     }
 }
 

@@ -66,12 +66,9 @@ fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>, modDoms: Map<S
                 +"Alpha"
 //                el("mod").append(modDoms.values.first())
                 onClickFunction = {
-                    replaceElement("mod-list"){
-                        div {
-                            id = "mod-list"
-                            modDoms.values.forEach { mod ->
-                                //todo - append mod dom
-                            }
+                    replaceElement("mod-list") {
+                        modDoms.values.forEach { mod ->
+                            //todo - append mod dom
                         }
                     }
                 }
