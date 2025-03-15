@@ -103,7 +103,7 @@ fun modView() {
 fun showMod(mod: Mod, display: Boolean) {
     val id = mod.uniqueId()
     modDoms[id]?.let { e ->
-        if (display && !getChanges().adds.contains(id)) e.removeClass("hidden") else e.addClass("hidden")
+        if (display && !getChanges().deletes.contains(id)) e.removeClass("hidden") else e.addClass("hidden")
     }
 }
 

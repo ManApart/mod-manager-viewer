@@ -42,9 +42,10 @@ data class Mod(
 
 @Serializable
 data class Changes(
-    val adds: MutableSet<String> = mutableSetOf(),
+    val adds: MutableSet<Int> = mutableSetOf(),
     val deletes: MutableSet<String> = mutableSetOf(),
-    val tags: MutableMap<String, List<String>> = mutableMapOf()
+    val tagsAdded: MutableMap<String, List<String>> = mutableMapOf(),
+    val tagsRemoved: MutableMap<String, List<String>> = mutableMapOf(),
 )
 
 private var inMemoryStorage = InMemoryStorage()
