@@ -12,7 +12,7 @@ fun loadInitialData(): Promise<*> {
         if (getMods().isNotEmpty()) {
         } else {
             loadJson("exampleData.json").then { json ->
-                loadFromJson(JSON.stringify(json))
+                loadFromJson("", JSON.stringify(json))
             }.catch { e ->
                 println("Failed to load example data ${JSON.stringify(e)}")
             }
@@ -20,8 +20,13 @@ fun loadInitialData(): Promise<*> {
     }
 }
 
-fun loadFromJson(json: String){
-    updateInMemoryStorage(jsonMapper.decodeFromString<InMemoryStorage>(json))
+fun loadFromJson(fileName: String, json: String) {
+    console.log(fileName)
+    if (fileName == "config.json") {
+        jsonMapper.decodeFromString<Config>(json).parseKeys().let {  saveCategories(it)}
+    } else {
+        updateInMemoryStorage(jsonMapper.decodeFromString<InMemoryStorage>(json))
+    }
     persistMemory()
 }
 

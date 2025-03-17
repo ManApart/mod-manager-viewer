@@ -10,6 +10,7 @@ data class InMemoryStorage(
     var mods: List<Mod> = listOf(),
     var profiles: List<Profile> = listOf(),
     val changes: Changes = Changes(),
+    var categories: Map<Int, String> = mapOf(),
 )
 
 @Serializable
@@ -53,9 +54,16 @@ data class Changes(
     val tagsRemoved: MutableMap<String, MutableSet<String>> = mutableMapOf(),
 )
 
+@Serializable
+data class Config(val categories: Map<String, String>) {
+    fun parseKeys() = categories.mapKeys { it.key.toInt() }
+}
+
 private var inMemoryStorage = InMemoryStorage()
 
 fun updateInMemoryStorage(newStorage: InMemoryStorage){
+    //TODO - don't delete changes
+    //Only load data object, not all in memory object
     inMemoryStorage = newStorage
 }
 
@@ -82,6 +90,10 @@ fun removeTag(mod: Mod, tag: String){
     if (removed[mod.uniqueId()] == null) removed[mod.uniqueId()] = mutableSetOf()
     removed[mod.uniqueId()]?.add(tag)
     persistMemory()
+}
+
+fun saveCategories(categories: Map<Int, String>) {
+    inMemoryStorage.categories = categories
 }
 
 fun createDB() {

@@ -20,26 +20,10 @@ fun main() {
         createDB()
         loadInitialData().then {
             println("Loaded ${getMods().size} mods")
-            doRouting()
+            modListView()
         }
     }
 }
-
-
-fun doRouting(windowHash: String = window.location.hash) {
-    when {
-        windowHash.startsWith("#upload") -> uploadView()
-        else -> modListView()
-    }
-}
-
-fun updateUrl(path: String) {
-    val pathName = path.split("/").first().capitalize()
-    if (!window.location.href.endsWith("#$path")) {
-        window.history.pushState(null, "", "#$path")
-    }
-}
-
 
 fun el(id: String) = document.getElementById(id) as HTMLElement
 fun <T> el(id: String) = document.getElementById(id) as T

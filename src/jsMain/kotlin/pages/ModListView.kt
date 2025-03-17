@@ -4,7 +4,6 @@ import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.div
-import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.tr
 import org.manapart.*
 import org.w3c.dom.Element
@@ -19,18 +18,10 @@ var modDoms = mapOf<String, Element>()
 private var mods = mapOf<String, Mod>()
 
 fun modListView() {
-    updateUrl("mods")
     mods = getMods().associateBy { it.uniqueId() }
     replaceElement {
         h1 { +"Mod Viewer" }
-        p {
-            button {
-                id = "upload-button"
-                +"Upload"
-                onClickFunction = { uploadView() }
-            }
-            +"your data.json to view your mod list on the go!"
-        }
+        uploadView()
         div { id = "changes" }
         controlsMenu(mods)
         div {

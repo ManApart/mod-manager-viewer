@@ -9,7 +9,7 @@ private enum class SearchType { NAME, CATEGORY, TAG, ALL }
 fun searchMods(mods: Map<String, Mod>, search: String){
     //TODO - calculate flags
     console.log("serching ",search, mods.keys.size, modDoms.keys.size)
-    mods.map { (id, mod) -> id to mod.isDisplayed(null, null, null, null, false, SearchType.ALL, search) }.forEach { (id, shown) -> if (shown) modDoms[id]?.removeClass("hidden") else modDoms[id]?.addClass("hidden") }
+    mods.map { (id, mod) -> id to mod.isDisplayed(null, null, null, null, false, SearchType.ALL, search.lowercase()) }.forEach { (id, shown) -> if (shown) modDoms[id]?.removeClass("hidden") else modDoms[id]?.addClass("hidden") }
 }
 
 private fun Mod.isDisplayed(
