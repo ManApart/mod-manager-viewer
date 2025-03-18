@@ -25,7 +25,7 @@ fun loadFromJson(fileName: String, json: String) {
     if (fileName == "config.json") {
         jsonMapper.decodeFromString<Config>(json).parseKeys().let {  saveCategories(it)}
     } else {
-        updateInMemoryStorage(jsonMapper.decodeFromString<InMemoryStorage>(json))
+        updateInMemoryStorage(jsonMapper.decodeFromString<DataJson>(json))
     }
     persistMemory()
 }

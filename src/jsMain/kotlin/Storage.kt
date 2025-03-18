@@ -14,6 +14,12 @@ data class InMemoryStorage(
 )
 
 @Serializable
+data class DataJson(
+    var mods: List<Mod> = listOf(),
+    var profiles: List<Profile> = listOf(),
+)
+
+@Serializable
 data class Profile(val name: String, var ids: List<Int>, var filePaths: List<String>) {
     fun modCount() = ids.size + filePaths.size
 }
@@ -40,9 +46,7 @@ data class Mod(
         return id?.toString() ?: fileId?.toString() ?: name
     }
     fun category(): String? {
-        //TODO - allow config uploading for category mappings
-        return null
-//        return categoryId?.let { toolConfig.categories[it] }
+        return categoryId?.let { inMemoryStorage.categories[it] }
     }
 }
 
@@ -61,10 +65,9 @@ data class Config(val categories: Map<String, String>) {
 
 private var inMemoryStorage = InMemoryStorage()
 
-fun updateInMemoryStorage(newStorage: InMemoryStorage){
-    //TODO - don't delete changes
-    //Only load data object, not all in memory object
-    inMemoryStorage = newStorage
+fun updateInMemoryStorage(data: DataJson){
+    inMemoryStorage.mods = data.mods
+    inMemoryStorage.profiles = data.profiles
 }
 
 fun clearStorage(){
