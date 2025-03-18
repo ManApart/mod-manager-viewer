@@ -21,7 +21,6 @@ fun loadInitialData(): Promise<*> {
 }
 
 fun loadFromJson(fileName: String, json: String) {
-    console.log(fileName)
     if (fileName == "config.json") {
         jsonMapper.decodeFromString<Config>(json).parseKeys().let {  saveCategories(it)}
     } else {

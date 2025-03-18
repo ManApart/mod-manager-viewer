@@ -21,6 +21,7 @@ fun modListView() {
     mods = getMods().associateBy { it.uniqueId() }
     replaceElement {
         h1 { +"Mod Viewer" }
+        a("./index.html", classes = "a-button home-button") { +"Home" }
         uploadView()
         div { id = "changes" }
         controlsMenu(mods)
