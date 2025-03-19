@@ -24,7 +24,7 @@ fun modListView() {
         a("./index.html", classes = "a-button home-button") { +"Home" }
         uploadView()
         div { id = "changes" }
-        controlsMenu(mods)
+        controlsMenu()
         div {
             id = "mod-list"
             mods.values.forEach { modView(it) }

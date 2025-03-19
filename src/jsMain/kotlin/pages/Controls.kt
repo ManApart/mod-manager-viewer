@@ -2,6 +2,7 @@ package org.manapart.pages
 
 import kotlinx.dom.addClass
 import kotlinx.html.*
+import kotlinx.html.js.button
 import kotlinx.html.js.div
 import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.onKeyUpFunction
@@ -9,6 +10,7 @@ import org.manapart.*
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.KeyboardEvent
 import org.w3c.xhr.JSON
 import org.w3c.xhr.XMLHttpRequest
 import org.w3c.xhr.XMLHttpRequestResponseType
@@ -27,17 +29,11 @@ private enum class FilterState(val show: (Boolean?) -> Boolean) {
     }
 }
 
-fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
+fun TagConsumer<HTMLElement>.controlsMenu() {
+    val mods = getMods().associateBy { it.uniqueId() }
     div {
         id = "controls"
         div("control-row") {
-            button {
-                img(classes = "icon", src = "./assets/collapse.svg") { }
-                +"Collapse"
-                onClickFunction = {
-                    mods.keys.forEach { el("$it-stats-row").addClass("minimized") }
-                }
-            }
             button {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Enabled"
@@ -63,9 +59,15 @@ fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
         }
         div("control-row") {
             button {
+                img(classes = "icon", src = "./assets/collapse.svg") { }
+                +"Collapse"
+                onClickFunction = {
+                    mods.keys.forEach { el("$it-stats-row").addClass("minimized") }
+                }
+            }
+            button {
                 img(classes = "icon", src = "./assets/sort.svg") { }
                 +"Alpha"
-//                el("mod").append(modDoms.values.first())
                 onClickFunction = {
                     replaceElement("mod-list") {
                         modDoms.values.forEach { mod ->
@@ -87,13 +89,37 @@ fun TagConsumer<HTMLElement>.controlsMenu(mods: Map<String, Mod>) {
             +"Search: "
             input(classes = "search") {
                 id = "search"
-                placeholder = "Filter: Name, Categories, Tags. Comma separated"
+                placeholder = "Filter: Name, Categories, Tags. - excludes"
                 value = ""
-                onKeyUpFunction = {
-                    searchMods(mods, el<HTMLInputElement>("search").value)
+                onKeyUpFunction = { key ->
+                    val search = el<HTMLInputElement>("search")
+                    if ((key as KeyboardEvent).key == "Enter") {
+                        searchTerms.add(search.value)
+                        search.value = ""
+                        updateSearchTerms()
+                    } else {
+                        currentSearch = search.value
+                    }
+                    searchMods(mods)
+                }
+            }
+            div { id = "search-terms" }
+        }
+        hr { }
+    }
+}
+
+private fun updateSearchTerms() {
+    replaceElement("search-terms") {
+        searchTerms.forEach { term ->
+            button {
+                +term
+                onClickFunction = {
+                    searchTerms.remove(term)
+                    updateSearchTerms()
+                    searchMods(getMods().associateBy { it.uniqueId() })
                 }
             }
         }
-        hr { }
     }
 }

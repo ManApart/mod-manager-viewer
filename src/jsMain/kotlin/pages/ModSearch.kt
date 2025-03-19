@@ -6,10 +6,16 @@ import org.manapart.Mod
 
 private enum class SearchType { NAME, CATEGORY, TAG, ALL }
 
-fun searchMods(mods: Map<String, Mod>, search: String){
+var currentSearch: String = ""
+val searchTerms: MutableSet<String> = mutableSetOf()
+
+fun searchMods(mods: Map<String, Mod>) {
     //TODO - calculate flags
-    console.log("serching ",search, mods.keys.size, modDoms.keys.size)
-    mods.map { (id, mod) -> id to mod.isDisplayed(null, null, null, null, false, SearchType.ALL, search.lowercase()) }.forEach { (id, shown) -> if (shown) modDoms[id]?.removeClass("hidden") else modDoms[id]?.addClass("hidden") }
+    if (currentSearch.isBlank()) modDoms.values.forEach { it.removeClass("hidden") } else {
+        console.log("serching ", "'$currentSearch'", mods.keys.size, modDoms.keys.size)
+        mods.map { (id, mod) -> id to mod.isDisplayed(null, null, null, null, false, SearchType.ALL, currentSearch.lowercase()) }
+            .forEach { (id, shown) -> if (shown) modDoms[id]?.removeClass("hidden") else modDoms[id]?.addClass("hidden") }
+    }
 }
 
 private fun Mod.isDisplayed(
