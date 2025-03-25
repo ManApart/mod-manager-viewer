@@ -27,7 +27,7 @@ fun modListView() {
         controlsMenu()
         div {
             id = "mod-list"
-            mods.values.forEach { modView(it) }
+            mods.values.sorted().forEach { modView(it) }
         }
         div { id = "tag-modal" }
     }

@@ -7,15 +7,9 @@ import kotlinx.html.js.div
 import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.onKeyUpFunction
 import org.manapart.*
-import org.w3c.dom.Element
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.KeyboardEvent
-import org.w3c.xhr.JSON
-import org.w3c.xhr.XMLHttpRequest
-import org.w3c.xhr.XMLHttpRequestResponseType
-import kotlin.js.Json
-import kotlin.js.Promise
 
 private enum class FilterState(val show: (Boolean?) -> Boolean) {
     ONLY({ it == true }),
@@ -68,21 +62,17 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
             button {
                 img(classes = "icon", src = "./assets/sort.svg") { }
                 +"Alpha"
-                onClickFunction = {
-                    replaceElement("mod-list") {
-                        modDoms.values.forEach { mod ->
-                            //todo - append mod dom
-                        }
-                    }
-                }
+                onClickFunction = { sortMods(ModSort.ALPHA) }
             }
             button {
                 img(classes = "icon", src = "./assets/sort.svg") { }
                 +"Load"
+                onClickFunction = { sortMods(ModSort.LOAD) }
             }
             button {
                 img(classes = "icon", src = "./assets/sort.svg") { }
                 +"Category"
+                onClickFunction = { sortMods(ModSort.CATEGORY) }
             }
         }
         div("control-row") {
@@ -108,6 +98,7 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
         hr { }
     }
 }
+
 
 private fun updateSearchTerms() {
     replaceElement("search-terms") {
