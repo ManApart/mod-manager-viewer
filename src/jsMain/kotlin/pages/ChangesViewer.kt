@@ -48,9 +48,11 @@ fun changesView() {
             div {
                 id = "changes-removed"
                 +"Removed: "
+                val mods = getMods().associateBy { it.uniqueId() }
                 changes.deletes.forEach { delete ->
-                    span("change-item") {
-                        +delete
+                    div("change-item") {
+                        val name = mods[delete]?.name ?: delete
+                        +"$name "
                         button {
                             +"X"
                             onClickFunction = {
