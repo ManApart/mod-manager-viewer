@@ -11,16 +11,18 @@ import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.KeyboardEvent
 
-private enum class FilterState(val show: (Boolean?) -> Boolean) {
-    ONLY({ it == true }),
-    NONE({ it != true }),
-    ANY({ true });
-
-    fun next() = when (this) {
-        ONLY -> NONE
-        NONE -> ANY
-        ANY -> ONLY
+private fun next(term: String) {
+    with(searchTerms) {
+        when {
+            contains("-$term") -> remove("-$term")
+            contains(term) -> {
+                remove(term)
+                add("-$term")
+            }
+            else -> add(term)
+        }
     }
+    updateSearchTerms()
 }
 
 fun TagConsumer<HTMLElement>.controlsMenu() {
@@ -31,23 +33,17 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
             button {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Enabled"
-                var filter = FilterState.ANY
                 onClickFunction = {
-                    filter = filter.next()
-                    mods.values.forEach { mod ->
-                        showMod(mod, filter.show(mod.enabled))
-                    }
+                    next("enabled")
+                    searchMods(mods)
                 }
             }
             button {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Endorsed"
-                var filter = FilterState.ANY
                 onClickFunction = {
-                    filter = filter.next()
-                    mods.values.forEach { mod ->
-                        showMod(mod, filter.show(mod.endorsed))
-                    }
+                    next("endorsed")
+                    searchMods(mods)
                 }
             }
         }
@@ -98,7 +94,6 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
         hr { }
     }
 }
-
 
 private fun updateSearchTerms() {
     replaceElement("search-terms") {
