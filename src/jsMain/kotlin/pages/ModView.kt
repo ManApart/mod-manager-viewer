@@ -6,12 +6,13 @@ import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.div
 import kotlinx.html.js.onClickFunction
-import kotlinx.html.js.tr
+import kotlinx.html.js.onKeyUpFunction
 import org.manapart.*
 import org.w3c.dom.HTMLButtonElement
 import org.w3c.dom.HTMLDivElement
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.KeyboardEvent
 
 
 fun TagConsumer<HTMLElement>.modView(mod: Mod) {
@@ -101,6 +102,7 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
                 onClickFunction = {
                     if (add.contains(tag)) add.remove(tag) else changes.tagsRemoved[mod.uniqueId()]
                     refreshTags(mod)
+                    changesView()
                     persistMemory()
                 }
             }
@@ -137,27 +139,41 @@ private fun tagModal(mod: Mod) {
                 input(InputType.text) {
                     id = "add-tag-input"
                     placeholder = "New Tag"
+                    onKeyUpFunction = { key ->
+                        if ((key as KeyboardEvent).key == "Enter") {
+                            addNewTag(mod)
+                        } else if (key.key == "Escape") {
+                            replaceElement("tag-modal") {}
+                            el("mod-list").removeClass("blur")
+                        }
+                    }
                 }
                 button {
                     +"+"
-                    onClickFunction = {
-                        val newTag = el<HTMLInputElement>("add-tag-input").value
-                        if (newTag.isNotBlank()) {
-                            addTag(mod, newTag)
-                            refreshTags(mod)
-                        }
-                    }
+                    onClickFunction = { addNewTag(mod) }
                 }
             }
         }
     }
+    el("add-tag-input").focus()
     el("mod-list").addClass("blur")
     val root = el<HTMLDivElement>("root")
     root.onclick = { event ->
-        if (event.target !is HTMLButtonElement && event.target !is HTMLInputElement){
+        if (event.target !is HTMLButtonElement && event.target !is HTMLInputElement) {
             root.onclick = "".asDynamic()
             replaceElement("tag-modal") {}
             el("mod-list").removeClass("blur")
         }
+    }
+}
+
+private fun addNewTag(mod: Mod) {
+    val newTag = el<HTMLInputElement>("add-tag-input").value
+    if (newTag.isNotBlank()) {
+        addTag(mod, newTag)
+        refreshTags(mod)
+        changesView()
+        replaceElement("tag-modal") {}
+        el("mod-list").removeClass("blur")
     }
 }

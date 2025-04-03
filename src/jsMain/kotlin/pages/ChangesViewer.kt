@@ -2,8 +2,10 @@ package org.manapart.pages
 
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
+import kotlinx.html.js.onKeyUpFunction
 import org.manapart.*
 import org.w3c.dom.HTMLInputElement
+import org.w3c.dom.events.KeyboardEvent
 
 fun changesView() {
     replaceElement("changes") {
@@ -29,17 +31,17 @@ fun changesView() {
                 input(InputType.text) {
                     id = "add-mod-input"
                     placeholder = "Mod Id"
+
+                    onKeyUpFunction = { key ->
+                        if ((key as KeyboardEvent).key == "Enter") {
+                            addMod(changes)
+                        }
+                    }
                 }
                 button {
                     +"+"
                     onClickFunction = {
-                        val id = el<HTMLInputElement>("add-mod-input").value.toIntOrNull()
-                        if (id != null && !getMods().map { it.id }.contains(id)) {
-                            console.log(id)
-                            changes.adds.add(id)
-                            changesView()
-                            persistMemory()
-                        }
+                        addMod(changes)
                     }
                 }
             }
@@ -75,5 +77,15 @@ fun changesView() {
                 }
             }
         }
+    }
+}
+
+private fun addMod(changes: Changes) {
+    val id = el<HTMLInputElement>("add-mod-input").value.toIntOrNull()
+    if (id != null && !getMods().map { it.id }.contains(id)) {
+        console.log(id)
+        changes.adds.add(id)
+        changesView()
+        persistMemory()
     }
 }
