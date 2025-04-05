@@ -1,5 +1,9 @@
 package org.manapart.pages
 
+import kotlinx.browser.document
+import kotlinx.browser.window
+import kotlinx.dom.addClass
+import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.onKeyUpFunction
@@ -70,6 +74,22 @@ fun changesView() {
         div {
             id = "changes-import"
             +"Import: "
+            button {
+                +"C"
+                onClickFunction = {
+                    window.navigator.clipboard.writeText(el("import-code").innerText)
+                    with(el("copy-confirmation")){
+                        removeClass("play")
+                        offsetWidth
+                        addClass("play")
+
+                    }
+                }
+            }
+            span {
+                id = "copy-confirmation"
+                +"Copied!"
+            }
             div {
                 id = "import-code"
                 code {

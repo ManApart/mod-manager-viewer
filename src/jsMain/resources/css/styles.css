@@ -267,3 +267,26 @@ input {
 .blur {
     filter: blur(4px);
 }
+
+#copy-confirmation {
+    opacity: 0;
+}
+
+#copy-confirmation.play {
+    animation: fadeOut 2s linear;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
