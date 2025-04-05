@@ -45,8 +45,13 @@ data class Mod(
     fun uniqueId(): String {
         return id?.toString() ?: fileId?.toString() ?: name
     }
+
     fun category(): String? {
         return categoryId?.let { inMemoryStorage.categories[it] }
+    }
+
+    fun allTags(changes: Changes): Set<String> {
+        return (tags + (changes.tagsAdded[uniqueId()] ?: emptySet())) - (changes.tagsRemoved[uniqueId()] ?: emptySet()).toSet()
     }
 }
 
@@ -65,12 +70,12 @@ data class Config(val categories: Map<String, String>) {
 
 private var inMemoryStorage = InMemoryStorage()
 
-fun updateInMemoryStorage(data: DataJson){
+fun updateInMemoryStorage(data: DataJson) {
     inMemoryStorage.mods = data.mods
     inMemoryStorage.profiles = data.profiles
 }
 
-fun clearStorage(){
+fun clearStorage() {
     inMemoryStorage = InMemoryStorage()
 }
 
@@ -82,13 +87,14 @@ fun resetStorage() {
 fun getProfiles() = inMemoryStorage.profiles
 fun getMods() = inMemoryStorage.mods
 fun getChanges() = inMemoryStorage.changes
-fun addTag(mod: Mod, tag: String){
+fun addTag(mod: Mod, tag: String) {
     val added = getChanges().tagsAdded
     if (added[mod.uniqueId()] == null) added[mod.uniqueId()] = mutableSetOf()
     added[mod.uniqueId()]?.add(tag)
     persistMemory()
 }
-fun removeTag(mod: Mod, tag: String){
+
+fun removeTag(mod: Mod, tag: String) {
     val removed = getChanges().tagsRemoved
     if (removed[mod.uniqueId()] == null) removed[mod.uniqueId()] = mutableSetOf()
     removed[mod.uniqueId()]?.add(tag)

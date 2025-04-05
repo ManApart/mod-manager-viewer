@@ -2,7 +2,6 @@ package org.manapart.pages
 
 import kotlinx.dom.addClass
 import kotlinx.html.*
-import kotlinx.html.js.button
 import kotlinx.html.js.div
 import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.onKeyUpFunction
@@ -10,20 +9,6 @@ import org.manapart.*
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.KeyboardEvent
-
-private fun next(term: String) {
-    with(searchTerms) {
-        when {
-            contains("-$term") -> remove("-$term")
-            contains(term) -> {
-                remove(term)
-                add("-$term")
-            }
-            else -> add(term)
-        }
-    }
-    updateSearchTerms()
-}
 
 fun TagConsumer<HTMLElement>.controlsMenu() {
     val mods = getMods().associateBy { it.uniqueId() }
@@ -34,7 +19,8 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Enabled"
                 onClickFunction = {
-                    next("enabled")
+                    searchTerms[SearchType.PROPERTY]?.add("enabled")
+                    updateSearchTerms()
                     searchMods(mods)
                 }
             }
@@ -42,7 +28,8 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
                 img(classes = "icon", src = "./assets/filter.svg") { }
                 +"Endorsed"
                 onClickFunction = {
-                    next("endorsed")
+                    searchTerms[SearchType.PROPERTY]?.add("endorsed")
+                    updateSearchTerms()
                     searchMods(mods)
                 }
             }
@@ -80,12 +67,25 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
                 onKeyUpFunction = { key ->
                     val search = el<HTMLInputElement>("search")
                     if ((key as KeyboardEvent).key == "Enter") {
-                        searchTerms.add(search.value)
+                        parseSearchTerm(search.value)
                         search.value = ""
+                        currentSearch = ""
                         updateSearchTerms()
+                        searchMods(mods)
                     } else {
                         currentSearch = search.value
+                        if (currentSearch.isBlank() || (!currentSearch.contains(":") && SearchType.entries.none { it.name.lowercase().contains(currentSearch.lowercase()) })) {
+                            searchMods(mods)
+                        }
                     }
+                }
+            }
+            button {
+                +"X"
+                onClickFunction = {
+                    val search = el<HTMLInputElement>("search")
+                    search.value = ""
+                    currentSearch = ""
                     searchMods(mods)
                 }
             }
@@ -97,13 +97,35 @@ fun TagConsumer<HTMLElement>.controlsMenu() {
 
 private fun updateSearchTerms() {
     replaceElement("search-terms") {
-        searchTerms.forEach { term ->
-            button {
-                +term
-                onClickFunction = {
-                    searchTerms.remove(term)
-                    updateSearchTerms()
-                    searchMods(getMods().associateBy { it.uniqueId() })
+        searchTerms.entries.filter { it.value.isNotEmpty() }.forEach { (kind, terms) ->
+            div {
+                +(kind.name.capitalizeWords() + ": ")
+                terms.forEach { term ->
+                    button {
+                        val text = if (term.startsWith("-")) "Not ${term.substring(1)}" else term
+                        +text
+                        onClickFunction = {
+                            console.log("click", term)
+                            if (term.startsWith("-")) {
+                                searchTerms[kind]?.remove(term)
+                                searchTerms[kind]?.add(term.substring(1))
+                            } else {
+                                searchTerms[kind]?.remove(term)
+                                searchTerms[kind]?.add("-$term")
+                            }
+                            updateSearchTerms()
+                            searchMods(getMods().associateBy { it.uniqueId() })
+                        }
+                    }
+                    button {
+                        +"X"
+                        onClickFunction = {
+                            searchTerms[kind]?.remove(term)
+                            updateSearchTerms()
+                            console.log(kind, term)
+                            searchMods(getMods().associateBy { it.uniqueId() })
+                        }
+                    }
                 }
             }
         }
