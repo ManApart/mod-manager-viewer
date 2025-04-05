@@ -173,6 +173,7 @@ private fun addNewTag(mod: Mod) {
         addTag(mod, newTag)
         refreshTags(mod)
         changesView()
+        controlsMenu()
         replaceElement("tag-modal") {}
         el("mod-list").removeClass("blur")
     }

@@ -101,6 +101,8 @@ fun removeTag(mod: Mod, tag: String) {
     persistMemory()
 }
 
+fun getCategories() = inMemoryStorage.categories.toMap()
+
 fun saveCategories(categories: Map<Int, String>) {
     inMemoryStorage.categories = categories
 }

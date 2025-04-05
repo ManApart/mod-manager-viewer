@@ -24,7 +24,7 @@ fun modListView() {
         a("./index.html", classes = "a-button home-button") { +"Home" }
         uploadView()
         div { id = "changes" }
-        controlsMenu()
+        div {            id = "controls"}
         div {
             id = "mod-list"
             mods.values.sorted().forEach { modView(it) }
@@ -33,13 +33,7 @@ fun modListView() {
     }
     modDoms = mods.keys.associateWith { el("mod-$it") }
     changesView()
-}
-
-fun showMod(mod: Mod, display: Boolean) {
-    val id = mod.uniqueId()
-    modDoms[id]?.let { e ->
-        if (display && !getChanges().deletes.contains(id)) e.removeClass("hidden") else e.addClass("hidden")
-    }
+    controlsMenu()
 }
 
 fun TagConsumer<HTMLElement>.tableRow(header: String, value: String) {
