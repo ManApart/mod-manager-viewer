@@ -49,6 +49,7 @@ fun changesView() {
                     }
                 }
             }
+            span("notification") { id = "add-notification" }
         }
         if (changes.deletes.isNotEmpty()) {
             div {
@@ -78,18 +79,10 @@ fun changesView() {
                 img(classes = "btn-icon", src = "./assets/copy.svg")
                 onClickFunction = {
                     window.navigator.clipboard.writeText(el("import-code").innerText)
-                    with(el("copy-confirmation")){
-                        removeClass("play")
-                        offsetWidth
-                        addClass("play")
-
-                    }
+                    playNotification("copy-confirmation", "Copied!")
                 }
             }
-            span {
-                id = "copy-confirmation"
-                +"Copied!"
-            }
+            span("notification") { id = "copy-confirmation" }
             div {
                 id = "import-code"
                 code {
@@ -100,12 +93,31 @@ fun changesView() {
     }
 }
 
-private fun addMod(changes: Changes) {
-    val id = el<HTMLInputElement>("add-mod-input").value.toIntOrNull()
-    if (id != null && !getMods().map { it.id }.contains(id)) {
-        console.log(id)
-        changes.adds.add(id)
-        changesView()
-        persistMemory()
+private fun playNotification(element: String, message: String) {
+    with(el(element)) {
+        innerText = message
+        removeClass("play-notification")
+        offsetWidth
+        addClass("play-notification")
     }
+}
+
+private fun addMod(changes: Changes) {
+    val id = el<HTMLInputElement>("add-mod-input").value.between("/", "?").toIntOrNull()
+    when {
+        id == null -> playNotification("add-notification", "Couldn't parse Id!")
+        changes.adds.contains(id) || getMods().map { it.id }.contains(id) -> playNotification("add-notification", "Already Exists!")
+        else -> {
+            changes.adds.add(id)
+            changesView()
+            persistMemory()
+            playNotification("add-notification", "Added $id!")
+        }
+    }
+}
+
+private fun String.between(prefix: String, suffix: String): String {
+    val start = lastIndexOf(prefix) + 1
+    val end = indexOf(suffix, start).let { if (it == -1) length else it }
+    return substring(start, end)
 }

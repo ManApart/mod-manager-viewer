@@ -277,11 +277,11 @@ input {
     filter: blur(4px);
 }
 
-#copy-confirmation {
+.notification {
     opacity: 0;
 }
 
-#copy-confirmation.play {
+.play-notification {
     animation: fadeOut 2s linear;
 }
 
