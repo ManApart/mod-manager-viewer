@@ -75,7 +75,7 @@ fun changesView() {
             id = "changes-import"
             +"Import: "
             button {
-                +"C"
+                img(classes = "btn-icon", src = "./assets/copy.svg")
                 onClickFunction = {
                     window.navigator.clipboard.writeText(el("import-code").innerText)
                     with(el("copy-confirmation")){

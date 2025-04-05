@@ -82,6 +82,15 @@ button, input::file-selector-button, .a-button, .upload-button {
     text-decoration: none;
 }
 
+.btn-icon {
+    width: 20px;
+}
+
+button:has(> .btn-icon) {
+    border: none;
+    background: var(--background-blue);
+}
+
 a {
     color: white;
 }
