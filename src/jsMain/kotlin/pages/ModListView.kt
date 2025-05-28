@@ -22,11 +22,11 @@ private var mods = mapOf<String, Mod>()
 fun modListView() {
     mods = getMods().associateBy { it.uniqueId() }
     replaceElement {
+        a("./index.html", classes = "a-button home-button") { +"Home" }
         h1 {
             span("game-title") { +currentMode().displayName }
             span("game-title") { +"Mod Viewer" }
         }
-        a("./index.html", classes = "a-button home-button") { +"Home" }
         button {
             +"Change Game"
             onClickFunction = {
