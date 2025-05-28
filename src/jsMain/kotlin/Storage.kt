@@ -5,7 +5,12 @@ import org.manapart.LocalForage.config
 import org.manapart.pages.loadInitialData
 import kotlin.js.Promise
 
-enum class GameMode { STARFIELD, OBLIVION_REMASTERED }
+enum class GameMode(val displayName: String) {
+    STARFIELD("Starfield"),
+    OBLIVION_REMASTERED("Oblivion Remastered");
+
+    fun game() = inMemoryStorage.games[this]!!
+}
 
 @Serializable
 data class InMemoryStorage(
@@ -13,7 +18,7 @@ data class InMemoryStorage(
     val games: MutableMap<GameMode, GameSpecificStorage> = mutableMapOf()
 ) {
     init {
-        GameMode.entries.forEach { games[it] = GameSpecificStorage() }
+        GameMode.entries.forEach { if (!games.containsKey(it)) games[it] = GameSpecificStorage() }
     }
 }
 
@@ -59,7 +64,7 @@ data class Mod(
     }
 
     fun category(): String? {
-        return categoryId?.let { currentGame().categories[it] }
+        return categoryId?.let { currentGame().categories[it] ?: it.toString() }
     }
 
     fun allTags(changes: Changes): Set<String> {
@@ -82,9 +87,9 @@ data class Config(val categories: Map<String, String>) {
 
 private var inMemoryStorage = InMemoryStorage()
 
-fun updateInMemoryStorage(data: DataJson) {
-    currentGame().mods = data.mods
-    currentGame().profiles = data.profiles
+fun updateInMemoryStorage(game: GameMode, data: DataJson) {
+    game.game().mods = data.mods
+    game.game().profiles = data.profiles
 }
 
 fun clearStorage() {
@@ -94,6 +99,17 @@ fun clearStorage() {
 fun resetStorage() {
     inMemoryStorage = InMemoryStorage()
     loadInitialData()
+}
+
+fun currentMode() = inMemoryStorage.currentMode
+fun nextMode() {
+    val i = GameMode.entries.indexOf(currentMode()) + 1
+    if (i >= GameMode.entries.size) {
+        inMemoryStorage.currentMode = GameMode.entries.first()
+    } else {
+        inMemoryStorage.currentMode = GameMode.entries[i]
+    }
+    persistMemory()
 }
 
 fun currentGame() = inMemoryStorage.games[inMemoryStorage.currentMode]!!
@@ -117,8 +133,8 @@ fun removeTag(mod: Mod, tag: String) {
 
 fun getCategories() = currentGame().categories.toMap()
 
-fun saveCategories(categories: Map<Int, String>) {
-    currentGame().categories = categories
+fun saveCategories(game: GameMode, categories: Map<Int, String>) {
+    game.game().categories = categories
 }
 
 fun createDB() {
@@ -126,15 +142,15 @@ fun createDB() {
 }
 
 fun persistMemory() {
-    LocalForage.setItem("memory", jsonMapper.encodeToString(inMemoryStorage))
+    LocalForage.setItem("starfield-mod-manager", jsonMapper.encodeToString(inMemoryStorage))
 }
 
 fun hasMemory(): Promise<Boolean> {
-    return LocalForage.getItem("memory").then { persisted -> return@then persisted != null }
+    return LocalForage.getItem("starfield-mod-manager").then { persisted -> return@then persisted != null }
 }
 
 fun loadMemory(): Promise<*> {
-    return LocalForage.getItem("memory").then { persisted ->
+    return LocalForage.getItem("starfield-mod-manager").then { persisted ->
         if (persisted != null && persisted != undefined) {
             inMemoryStorage = jsonMapper.decodeFromString(persisted as String)
         }

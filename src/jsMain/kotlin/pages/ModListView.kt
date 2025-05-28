@@ -3,7 +3,9 @@ package org.manapart.pages
 import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
 import kotlinx.html.*
+import kotlinx.html.js.button
 import kotlinx.html.js.div
+import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.tr
 import org.manapart.*
 import org.w3c.dom.Element
@@ -20,8 +22,15 @@ private var mods = mapOf<String, Mod>()
 fun modListView() {
     mods = getMods().associateBy { it.uniqueId() }
     replaceElement {
-        h1 { +"Mod Viewer" }
+        h1 { +"${currentMode().displayName} Mod Viewer" }
         a("./index.html", classes = "a-button home-button") { +"Home" }
+        button {
+            +"Change Game"
+            onClickFunction = {
+                nextMode()
+                modListView()
+            }
+        }
         uploadView()
         div { id = "changes" }
         div {            id = "controls"}

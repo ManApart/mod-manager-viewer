@@ -9,10 +9,9 @@ import kotlin.js.Promise
 
 fun loadInitialData(): Promise<*> {
     return loadMemory().then {
-        if (getMods().isNotEmpty()) {
-        } else {
+        if (getMods().isEmpty()) {
             loadJson("exampleData.json").then { json ->
-                loadFromJson("", JSON.stringify(json))
+                loadFromJson("starfield-data.json", JSON.stringify(json))
             }.catch { e ->
                 println("Failed to load example data ${JSON.stringify(e)}")
             }
@@ -21,10 +20,11 @@ fun loadInitialData(): Promise<*> {
 }
 
 fun loadFromJson(fileName: String, json: String) {
-    if (fileName == "config.json") {
-        jsonMapper.decodeFromString<Config>(json).parseKeys().let {  saveCategories(it)}
+    val game = if (fileName.startsWith("starfield")) GameMode.STARFIELD else GameMode.OBLIVION_REMASTERED
+    if (fileName.endsWith("config.json")) {
+        jsonMapper.decodeFromString<Config>(json).parseKeys().let {  saveCategories(game, it)}
     } else {
-        updateInMemoryStorage(jsonMapper.decodeFromString<DataJson>(json))
+        updateInMemoryStorage(game, jsonMapper.decodeFromString<DataJson>(json))
     }
     persistMemory()
 }

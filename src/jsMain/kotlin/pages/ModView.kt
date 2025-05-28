@@ -75,7 +75,7 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
 
                 tableRow("Version", needsUpdate + (mod.version ?: "?"))
                 tableRow("Load Order", mod.loadOrder.toString())
-                tableRow("Category", mod.category()?.toString() ?: "")
+                tableRow("Category", mod.category() ?: "")
                 tr {
                     td { +"Tags" }
                     td {
