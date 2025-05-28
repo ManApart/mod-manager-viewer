@@ -22,7 +22,10 @@ private var mods = mapOf<String, Mod>()
 fun modListView() {
     mods = getMods().associateBy { it.uniqueId() }
     replaceElement {
-        h1 { +"${currentMode().displayName} Mod Viewer" }
+        h1 {
+            span("game-title") { +currentMode().displayName }
+            span("game-title") { +"Mod Viewer" }
+        }
         a("./index.html", classes = "a-button home-button") { +"Home" }
         button {
             +"Change Game"
@@ -33,7 +36,7 @@ fun modListView() {
         }
         uploadView()
         div { id = "changes" }
-        div {            id = "controls"}
+        div { id = "controls" }
         div {
             id = "mod-list"
             mods.values.sorted().forEach { modView(it) }
