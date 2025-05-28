@@ -5,8 +5,20 @@ import org.manapart.LocalForage.config
 import org.manapart.pages.loadInitialData
 import kotlin.js.Promise
 
+enum class GameMode { STARFIELD, OBLIVION_REMASTERED }
+
 @Serializable
 data class InMemoryStorage(
+    var currentMode: GameMode = GameMode.STARFIELD,
+    val games: MutableMap<GameMode, GameSpecificStorage> = mutableMapOf()
+) {
+    init {
+        GameMode.entries.forEach { games[it] = GameSpecificStorage() }
+    }
+}
+
+@Serializable
+data class GameSpecificStorage(
     var mods: List<Mod> = listOf(),
     var profiles: List<Profile> = listOf(),
     val changes: Changes = Changes(),
@@ -47,7 +59,7 @@ data class Mod(
     }
 
     fun category(): String? {
-        return categoryId?.let { inMemoryStorage.categories[it] }
+        return categoryId?.let { currentGame().categories[it] }
     }
 
     fun allTags(changes: Changes): Set<String> {
@@ -71,8 +83,8 @@ data class Config(val categories: Map<String, String>) {
 private var inMemoryStorage = InMemoryStorage()
 
 fun updateInMemoryStorage(data: DataJson) {
-    inMemoryStorage.mods = data.mods
-    inMemoryStorage.profiles = data.profiles
+    currentGame().mods = data.mods
+    currentGame().profiles = data.profiles
 }
 
 fun clearStorage() {
@@ -84,9 +96,11 @@ fun resetStorage() {
     loadInitialData()
 }
 
-fun getProfiles() = inMemoryStorage.profiles
-fun getMods() = inMemoryStorage.mods
-fun getChanges() = inMemoryStorage.changes
+fun currentGame() = inMemoryStorage.games[inMemoryStorage.currentMode]!!
+
+fun getProfiles() = currentGame().profiles
+fun getMods() = currentGame().mods
+fun getChanges() = currentGame().changes
 fun addTag(mod: Mod, tag: String) {
     val added = getChanges().tagsAdded
     if (added[mod.uniqueId()] == null) added[mod.uniqueId()] = mutableSetOf()
@@ -101,10 +115,10 @@ fun removeTag(mod: Mod, tag: String) {
     persistMemory()
 }
 
-fun getCategories() = inMemoryStorage.categories.toMap()
+fun getCategories() = currentGame().categories.toMap()
 
 fun saveCategories(categories: Map<Int, String>) {
-    inMemoryStorage.categories = categories
+    currentGame().categories = categories
 }
 
 fun createDB() {
