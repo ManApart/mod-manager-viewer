@@ -67,7 +67,7 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                     td { +(mod.id?.toString() ?: "?") }
                     onClickFunction = {
                         if (mod.id != null) window.open(
-                            "https://www.nexusmods.com/starfield/mods/${mod.id}",
+                            "https://www.nexusmods.com/${currentMode().pathName}/mods/${mod.id}",
                             "_blank"
                         )
                     }

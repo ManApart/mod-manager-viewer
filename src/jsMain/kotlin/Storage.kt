@@ -5,9 +5,9 @@ import org.manapart.LocalForage.config
 import org.manapart.pages.loadInitialData
 import kotlin.js.Promise
 
-enum class GameMode(val displayName: String) {
-    STARFIELD("Starfield"),
-    OBLIVION_REMASTERED("Oblivion Remastered");
+enum class GameMode(val displayName: String, val pathName: String) {
+    STARFIELD("Starfield", "starfield"),
+    OBLIVION_REMASTERED("Oblivion Remastered", "oblivionremastered");
 
     fun game() = inMemoryStorage.games[this]!!
 }
