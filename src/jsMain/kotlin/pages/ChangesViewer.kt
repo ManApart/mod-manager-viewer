@@ -90,6 +90,11 @@ fun changesView() {
                                         }
                                     }
                                     +"$name "
+                                    onClickFunction = {
+                                        currentSearch = id
+                                        el<HTMLInputElement>("search").value = id
+                                        searchMods(getMods().associateBy { it.uniqueId() })
+                                    }
                                 }
                             }
                     }
