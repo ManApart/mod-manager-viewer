@@ -16,7 +16,8 @@ import org.w3c.dom.events.KeyboardEvent
 
 
 fun TagConsumer<HTMLElement>.modView(mod: Mod) {
-    val classes = if (getChanges().deletes.contains(mod.uniqueId())) "hidden modRow" else "modRow"
+    val modIsDeleted = getChanges().deletes.contains(mod.uniqueId())
+    val classes = if (modIsDeleted) "hidden modRow" else "modRow"
     div(classes) {
         id = "mod-${mod.uniqueId()}"
         val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
@@ -28,7 +29,8 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                 else -> ""
             }
 
-            span("modName") { +mod.name.capitalizeWords() }
+            val deletedClass = if(modIsDeleted) "modDeleted" else ""
+            span("modName $deletedClass") { +mod.name.capitalizeWords() }
             span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
 
             onClickFunction = {

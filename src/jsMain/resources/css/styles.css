@@ -233,6 +233,10 @@ input {
     display: none;
 }
 
+.modDeleted {
+    text-decoration: line-through;
+}
+
 .modEmojis {
     float: right;
     margin-left: -50px;
