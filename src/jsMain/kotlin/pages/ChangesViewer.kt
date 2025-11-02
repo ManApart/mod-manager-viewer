@@ -15,7 +15,6 @@ fun changesView() {
     replaceElement("changes") {
         button {
             id = "view-changes-toggle"
-
             +(if(showChanges) "Hide Changes" else "Show Changes")
             onClickFunction = {
                 val btn = el("view-changes-toggle")

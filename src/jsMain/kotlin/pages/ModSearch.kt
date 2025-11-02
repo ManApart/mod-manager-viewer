@@ -29,7 +29,7 @@ fun parseSearchTerm(raw: String) {
 
 fun searchMods(mods: Map<String, Mod>) {
     val props = searchTerms[SearchType.PROPERTY]!!
-    val searchId = props.firstNotNullOfOrNull { it.toIntOrNull() }?.toString()
+    val searchId = props.firstNotNullOfOrNull { it.toIntOrNull() }?.toString() ?: currentSearch.toIntOrNull()?.toString()
     val endorsed = if (props.contains("endorsed")) true else null
     val unendorsed = props.contains("unendorsed") || props.contains("-endorsed")
     val enabled = props.parseFlag("enabled")
