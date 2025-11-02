@@ -29,7 +29,7 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                 else -> ""
             }
 
-            val deletedClass = if(modIsDeleted) "modDeleted" else ""
+            val deletedClass = if (modIsDeleted) "modDeleted" else ""
             span("modName $deletedClass") { +mod.name.capitalizeWords() }
             span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
 
@@ -102,7 +102,12 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
             button {
                 +"X"
                 onClickFunction = {
-                    if (add.contains(tag)) add.remove(tag) else changes.tagsRemoved[mod.uniqueId()]
+                    if (add.contains(tag)) {
+                        add.remove(tag)
+                        if (add.isEmpty()){
+                            changes.tagsAdded.remove(mod.uniqueId())
+                        }
+                    } else changes.tagsRemoved[mod.uniqueId()]
                     refreshTags(mod)
                     changesView()
                     persistMemory()

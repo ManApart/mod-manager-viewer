@@ -1,6 +1,5 @@
 package org.manapart.pages
 
-import kotlinx.browser.document
 import kotlinx.browser.window
 import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
