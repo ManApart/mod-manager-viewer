@@ -124,13 +124,6 @@ fun addTag(mod: Mod, tag: String) {
     persistMemory()
 }
 
-fun removeTag(mod: Mod, tag: String) {
-    val removed = getChanges().tagsRemoved
-    if (removed[mod.uniqueId()] == null) removed[mod.uniqueId()] = mutableSetOf()
-    removed[mod.uniqueId()]?.add(tag)
-    persistMemory()
-}
-
 fun getCategories() = currentGame().categories.toMap()
 
 fun saveCategories(game: GameMode, categories: Map<Int, String>) {

@@ -10,82 +10,108 @@ import org.manapart.*
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.KeyboardEvent
 
+var showChanges = false
 fun changesView() {
     replaceElement("changes") {
-        val changes = getChanges()
-        div {
-            id = "changes-added"
-            +"Added: "
-            changes.adds.forEach { add ->
-                span("change-item") {
-                    a("https://www.nexusmods.com/starfield/mods/$add", target = "_blank") { +add.toString() }
-                    button {
-                        +"X"
-                        onClickFunction = {
-                            getChanges().adds.remove(add)
-                            changesView()
-                            persistMemory()
-                        }
-                    }
-                }
-            }
-            span {
-                id = "add-mod"
-                input(InputType.text) {
-                    id = "add-mod-input"
-                    placeholder = "Mod Id"
+        button {
+            id = "view-changes-toggle"
 
-                    onKeyUpFunction = { key ->
-                        if ((key as KeyboardEvent).key == "Enter") {
-                            addMod(changes)
-                        }
-                    }
-                }
-                button {
-                    +"+"
-                    onClickFunction = {
-                        addMod(changes)
-                    }
+            +(if(showChanges) "Hide Changes" else "Show Changes")
+            onClickFunction = {
+                val btn = el("view-changes-toggle")
+                val changesSection = el("changes-section")
+                showChanges = !showChanges
+                if (showChanges){
+                    changesSection.removeClass("hidden")
+                    btn.textContent = "Hide Changes"
+                } else {
+                    changesSection.addClass("hidden")
+                    btn.textContent = "Show Changes"
                 }
             }
-            span("notification") { id = "add-notification" }
         }
-        if (changes.deletes.isNotEmpty()) {
+        val hiddenClass = if (showChanges) "" else "hidden"
+        div(hiddenClass) {
+            id = "changes-section"
+            val changes = getChanges()
             div {
-                id = "changes-removed"
-                +"Removed: "
-                val mods = getMods().associateBy { it.uniqueId() }
-                changes.deletes.forEach { delete ->
-                    div("change-item") {
-                        val name = mods[delete]?.name ?: delete
-                        +"$name "
+                id = "changes-added"
+                +"Added: "
+                changes.adds.forEach { add ->
+                    span("change-item") {
+                        a("https://www.nexusmods.com/starfield/mods/$add", target = "_blank") { +add.toString() }
                         button {
                             +"X"
                             onClickFunction = {
-                                getChanges().deletes.remove(delete)
-                                modListView()
+                                getChanges().adds.remove(add)
+                                changesView()
                                 persistMemory()
                             }
                         }
                     }
                 }
+                span {
+                    id = "add-mod"
+                    input(InputType.text) {
+                        id = "add-mod-input"
+                        placeholder = "Mod Id"
+
+                        onKeyUpFunction = { key ->
+                            if ((key as KeyboardEvent).key == "Enter") {
+                                addMod(changes)
+                            }
+                        }
+                    }
+                    button {
+                        +"+"
+                        onClickFunction = {
+                            addMod(changes)
+                        }
+                    }
+                }
+                span("notification") { id = "add-notification" }
             }
-        }
-        div {
-            id = "changes-import"
-            +"Import: "
-            button {
-                img(classes = "btn-icon", src = "./assets/copy.svg")
-                onClickFunction = {
-                    window.navigator.clipboard.writeText(el("import-code").innerText)
-                    playNotification("copy-confirmation", "Copied!")
+            if (changes.deletes.isNotEmpty()) {
+                div {
+                    id = "changes-removed"
+                    +"Removed: "
+                    val mods = getMods().associateBy { it.uniqueId() }
+                    ul {
+                        changes.deletes
+                            .map { it to (mods[it]?.name ?: it) }
+                            .sortedBy { it.first }
+                            .forEach { (id, name) ->
+                                li {
+                                    button {
+                                        +"X"
+                                        onClickFunction = {
+                                            getChanges().deletes.remove(id)
+                                            modListView()
+                                            persistMemory()
+                                        }
+                                    }
+                                    +"$name "
+                                }
+                            }
+                    }
                 }
             }
-            span("notification") { id = "copy-confirmation" }
             div {
-                id = "import-code"
-                code {
-                    +jsonMapper.encodeToString(changes)
+                id = "changes-import"
+                +"Import: "
+                button {
+                    img(classes = "btn-icon", src = "./assets/copy.svg")
+                    onClickFunction = {
+                        window.navigator.clipboard.writeText(el("import-code").innerText)
+                        playNotification("copy-confirmation", "Copied!")
+                    }
+                }
+                span("notification") { id = "copy-confirmation" }
+                div {
+                    id = "import-code"
+                    code {
+                        +jsonMapper.encodeToString(changes)
+                    }
                 }
             }
         }
