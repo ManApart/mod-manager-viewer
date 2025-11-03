@@ -29,6 +29,16 @@ fun changesView() {
                 }
             }
         }
+        button {
+            +"Clear Changes"
+            onClickFunction = {
+                if (window.confirm("Delete All Changes?")){
+                    currentGame().changes.clear()
+                    changesView()
+                    persistMemory()
+                }
+            }
+        }
         val hiddenClass = if (showChanges) "" else "hidden"
         div(hiddenClass) {
             id = "changes-section"
