@@ -2,17 +2,28 @@ package org.manapart.pages
 
 import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
+import kotlinx.html.Entities
 import kotlinx.serialization.Serializable
 import org.manapart.Changes
 import org.manapart.Mod
 import org.manapart.getChanges
-import org.manapart.jsonMapper
 
 @Serializable
 enum class SearchType { PROPERTY, NAME, CATEGORY, TAG }
 
+fun searchingProperty(search: String) = SearchType.entries.any { Entities.it.name.lowercase().contains(search.lowercase()) }
+
 var currentSearch: String = ""
-val searchTerms: MutableMap<SearchType, MutableSet<String>> = SearchType.entries.associateWith { mutableSetOf<String>() }.toMutableMap()
+val searchTerms: Map<SearchType, MutableSet<String>> = SearchType.entries.associateWith { mutableSetOf() }
+var tempTerm: Pair<SearchType, String>? = null
+
+fun parseTempTerm(raw: String) {
+    val parts = raw.split(":")
+    val category = parts.first().lowercase()
+    val term = parts.last().lowercase()
+        val type = SearchType.entries.firstOrNull { it.name.lowercase() == category } ?: SearchType.NAME
+        tempTerm = type to term
+}
 
 fun parseSearchTerm(raw: String) {
     val parts = raw.split(":")
@@ -37,10 +48,12 @@ fun searchMods(mods: Map<String, Mod>) {
     val enable = disabled?.let { false } ?: enabled
     val missing = props.parseFlag("missing")
 
+    val usedTerms = if (tempTerm == null) searchTerms else searchTerms.entries.associate { (k,v) -> k to v.toMutableSet() }.toMutableMap().also { it[tempTerm!!.first]?.add(tempTerm!!.second) }
+
     if (currentSearch.isBlank() && searchTerms.values.all { it.isEmpty() }) modDoms.values.forEach { it.removeClass("hidden") } else {
 //        console.log("searching ", "'$currentSearch'", mods.keys.size, modDoms.keys.size, jsonMapper.encodeToString(searchTerms))
         mods.map { (id, mod) ->
-            id to mod.isDisplayed(enable, missing, searchId, endorsed, unendorsed, searchTerms, currentSearch.lowercase(), getChanges())
+            id to mod.isDisplayed(enable, missing, searchId, endorsed, unendorsed, usedTerms, currentSearch.lowercase(), getChanges())
         }.forEach { (id, shown) -> if (shown) modDoms[id]?.removeClass("hidden") else modDoms[id]?.addClass("hidden") }
     }
 }

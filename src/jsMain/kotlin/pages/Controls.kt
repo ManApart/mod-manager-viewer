@@ -6,7 +6,6 @@ import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.*
 import org.manapart.*
-import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.HTMLSelectElement
 import org.w3c.dom.events.KeyboardEvent
@@ -110,6 +109,7 @@ fun controlsMenu() {
                                 parseSearchTerm(search.value)
                                 search.value = ""
                                 currentSearch = ""
+                                tempTerm = null
                                 updateSearchTerms()
                                 searchMods(mods)
                             }
@@ -123,8 +123,20 @@ fun controlsMenu() {
 
                             else -> {
                                 currentSearch = search.value
-                                if (currentSearch.isBlank() || (!currentSearch.contains(":") && SearchType.entries.none { it.name.lowercase().contains(currentSearch.lowercase()) })) {
-                                    searchMods(mods)
+                                when {
+                                    currentSearch.isBlank() -> {
+                                        tempTerm = null
+                                        searchMods(mods)
+                                    }
+                                    !currentSearch.contains(":") && !searchingProperty(currentSearch) -> {
+                                        tempTerm = null
+                                        searchMods(mods)
+                                    }
+                                    currentSearch.contains(":") && currentSearch.split(":").last().length > 1 -> {
+                                        parseTempTerm(search.value)
+                                        println(tempTerm)
+                                        searchMods(mods)
+                                    }
                                 }
                             }
                         }
