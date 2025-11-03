@@ -4,9 +4,8 @@ import kotlinx.dom.addClass
 import kotlinx.dom.removeClass
 import kotlinx.html.Entities
 import kotlinx.serialization.Serializable
-import org.manapart.Changes
-import org.manapart.Mod
-import org.manapart.getChanges
+import org.manapart.*
+import org.w3c.dom.HTMLInputElement
 
 @Serializable
 enum class SearchType { PROPERTY, NAME, CATEGORY, TAG }
@@ -17,12 +16,26 @@ var currentSearch: String = ""
 val searchTerms: Map<SearchType, MutableSet<String>> = SearchType.entries.associateWith { mutableSetOf() }
 var tempTerm: Pair<SearchType, String>? = null
 
+fun searchTerm(term: String) {
+    currentSearch = term
+    el<HTMLInputElement>("search").value = term
+    searchMods(getMods().associateBy { it.uniqueId() })
+}
+
+fun searchTerm(type: SearchType, term: String) {
+    clearTerms()
+    searchTerms[type]?.add(term)
+    updateSearchTerms()
+    searchMods(getMods().associateBy { it.uniqueId() })
+}
+
+
 fun parseTempTerm(raw: String) {
     val parts = raw.split(":")
     val category = parts.first().lowercase()
     val term = parts.last().lowercase()
-        val type = SearchType.entries.firstOrNull { it.name.lowercase() == category } ?: SearchType.NAME
-        tempTerm = type to term
+    val type = SearchType.entries.firstOrNull { it.name.lowercase() == category } ?: SearchType.NAME
+    tempTerm = type to term
 }
 
 fun parseSearchTerm(raw: String) {
@@ -38,6 +51,8 @@ fun parseSearchTerm(raw: String) {
     }
 }
 
+fun clearTerms() = searchTerms.values.forEach { it.clear() }
+
 fun searchMods(mods: Map<String, Mod>) {
     val props = searchTerms[SearchType.PROPERTY]!!
     val searchId = props.firstNotNullOfOrNull { it.toIntOrNull() }?.toString() ?: currentSearch.toIntOrNull()?.toString()
@@ -48,7 +63,7 @@ fun searchMods(mods: Map<String, Mod>) {
     val enable = disabled?.let { false } ?: enabled
     val missing = props.parseFlag("missing")
 
-    val usedTerms = if (tempTerm == null) searchTerms else searchTerms.entries.associate { (k,v) -> k to v.toMutableSet() }.toMutableMap().also { it[tempTerm!!.first]?.add(tempTerm!!.second) }
+    val usedTerms = if (tempTerm == null) searchTerms else searchTerms.entries.associate { (k, v) -> k to v.toMutableSet() }.toMutableMap().also { it[tempTerm!!.first]?.add(tempTerm!!.second) }
 
     if (currentSearch.isBlank() && searchTerms.values.all { it.isEmpty() }) modDoms.values.forEach { it.removeClass("hidden") } else {
 //        console.log("searching ", "'$currentSearch'", mods.keys.size, modDoms.keys.size, jsonMapper.encodeToString(searchTerms))

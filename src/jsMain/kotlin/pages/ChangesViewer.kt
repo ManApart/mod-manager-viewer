@@ -15,12 +15,12 @@ fun changesView() {
     replaceElement("changes") {
         button {
             id = "view-changes-toggle"
-            +(if(showChanges) "Hide Changes" else "Show Changes")
+            +(if (showChanges) "Hide Changes" else "Show Changes")
             onClickFunction = {
                 val btn = el("view-changes-toggle")
                 val changesSection = el("changes-section")
                 showChanges = !showChanges
-                if (showChanges){
+                if (showChanges) {
                     changesSection.removeClass("hidden")
                     btn.textContent = "Hide Changes"
                 } else {
@@ -32,7 +32,7 @@ fun changesView() {
         button {
             +"Clear Changes"
             onClickFunction = {
-                if (window.confirm("Delete All Changes?")){
+                if (window.confirm("Delete All Changes?")) {
                     currentGame().changes.clear()
                     changesView()
                     persistMemory()
@@ -100,11 +100,7 @@ fun changesView() {
                                         }
                                     }
                                     +"$name "
-                                    onClickFunction = {
-                                        currentSearch = id
-                                        el<HTMLInputElement>("search").value = id
-                                        searchMods(getMods().associateBy { it.uniqueId() })
-                                    }
+                                    onClickFunction = { searchTerm(id) }
                                 }
                             }
                     }

@@ -100,7 +100,6 @@ fun controlsMenu() {
                 +"Search: "
                 input(classes = "search") {
                     id = "search"
-                    placeholder = "Filter: Name, Categories, Tags. - excludes"
                     value = ""
                     onKeyUpFunction = { key ->
                         val search = el<HTMLInputElement>("search")
@@ -160,7 +159,7 @@ fun controlsMenu() {
     }
 }
 
-private fun updateSearchTerms() {
+fun updateSearchTerms() {
     replaceElement("search-terms") {
         searchTerms.entries.filter { it.value.isNotEmpty() }.forEach { (kind, terms) ->
             div {

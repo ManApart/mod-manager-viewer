@@ -77,7 +77,15 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
 
                 tableRow("Version", needsUpdate + (mod.version ?: "?"))
                 tableRow("Load Order", mod.loadOrder.toString())
-                tableRow("Category", mod.category() ?: "")
+                tr {
+                    td { +"Category" }
+                    td {
+                        +(mod.category() ?: "")
+                        mod.category()?.let { cat ->
+                            onClickFunction = { searchTerm(SearchType.CATEGORY, cat.lowercase()) }
+                        }
+                    }
+                }
                 tr {
                     td { +"Tags" }
                     td {
@@ -99,12 +107,13 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
     (mod.tags.filter { !del.contains(it) } + add).forEach { tag ->
         span("change-item") {
             +tag
+            onClickFunction = { searchTerm(SearchType.TAG, tag) }
             button {
                 +"X"
                 onClickFunction = {
                     if (add.contains(tag)) {
                         add.remove(tag)
-                        if (add.isEmpty()){
+                        if (add.isEmpty()) {
                             changes.tagsAdded.remove(mod.uniqueId())
                         }
                     } else changes.tagsRemoved[mod.uniqueId()]
