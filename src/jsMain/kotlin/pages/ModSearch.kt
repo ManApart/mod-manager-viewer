@@ -19,7 +19,7 @@ fun parseSearchTerm(raw: String) {
     val category = parts.first().lowercase()
     val term = parts.last().lowercase()
     if (parts.size == 1) {
-        val type = if (listOf("endorsed", "unendorsed", "enabled", "missing").contains(category) || category.toIntOrNull() != null) SearchType.PROPERTY else SearchType.NAME
+        val type = if (listOf("endorsed", "unendorsed", "enabled", "disabled", "missing").contains(category) || category.toIntOrNull() != null) SearchType.PROPERTY else SearchType.NAME
         searchTerms[type]?.add(category)
     } else {
         val type = SearchType.entries.firstOrNull { it.name.lowercase() == category } ?: SearchType.NAME
@@ -33,12 +33,14 @@ fun searchMods(mods: Map<String, Mod>) {
     val endorsed = if (props.contains("endorsed")) true else null
     val unendorsed = props.contains("unendorsed") || props.contains("-endorsed")
     val enabled = props.parseFlag("enabled")
+    val disabled = props.parseFlag("disabled")
+    val enable = disabled?.let { false } ?: enabled
     val missing = props.parseFlag("missing")
 
     if (currentSearch.isBlank() && searchTerms.values.all { it.isEmpty() }) modDoms.values.forEach { it.removeClass("hidden") } else {
 //        console.log("searching ", "'$currentSearch'", mods.keys.size, modDoms.keys.size, jsonMapper.encodeToString(searchTerms))
         mods.map { (id, mod) ->
-            id to mod.isDisplayed(enabled, missing, searchId, endorsed, unendorsed, searchTerms, currentSearch.lowercase(), getChanges())
+            id to mod.isDisplayed(enable, missing, searchId, endorsed, unendorsed, searchTerms, currentSearch.lowercase(), getChanges())
         }.forEach { (id, shown) -> if (shown) modDoms[id]?.removeClass("hidden") else modDoms[id]?.addClass("hidden") }
     }
 }

@@ -1,6 +1,8 @@
 package org.manapart.pages
 
 import kotlinx.dom.addClass
+import kotlinx.dom.hasClass
+import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.*
 import org.manapart.*
@@ -87,6 +89,15 @@ fun controlsMenu() {
                 }
             }
             div("control-row") {
+                button {
+                    +"?"
+                    onClickFunction = {
+                        val help = el("search-help")
+                        if (help.hasClass("hidden")) {
+                            help.removeClass("hidden")
+                        } else help.addClass("hidden")
+                    }
+                }
                 +"Search: "
                 input(classes = "search") {
                     id = "search"
@@ -94,18 +105,30 @@ fun controlsMenu() {
                     value = ""
                     onKeyUpFunction = { key ->
                         val search = el<HTMLInputElement>("search")
-                        if ((key as KeyboardEvent).key == "Enter") {
-                            parseSearchTerm(search.value)
-                            search.value = ""
-                            currentSearch = ""
-                            updateSearchTerms()
-                            searchMods(mods)
-                        } else {
-                            currentSearch = search.value
-                            if (currentSearch.isBlank() || (!currentSearch.contains(":") && SearchType.entries.none { it.name.lowercase().contains(currentSearch.lowercase()) })) {
+                        when {
+                            (key as KeyboardEvent).key == "Enter" -> {
+                                parseSearchTerm(search.value)
+                                search.value = ""
+                                currentSearch = ""
+                                updateSearchTerms()
                                 searchMods(mods)
                             }
+
+                            currentSearch.isBlank()
+                                    && search.value.length == 1
+                                    && search.value.toIntOrNull() == null
+                                -> {
+                                //Don't search on single character, unless number
+                            }
+
+                            else -> {
+                                currentSearch = search.value
+                                if (currentSearch.isBlank() || (!currentSearch.contains(":") && SearchType.entries.none { it.name.lowercase().contains(currentSearch.lowercase()) })) {
+                                    searchMods(mods)
+                                }
+                            }
                         }
+
                     }
                 }
                 button {
@@ -117,6 +140,7 @@ fun controlsMenu() {
                         searchMods(mods)
                     }
                 }
+                searchHelp()
                 div { id = "search-terms" }
             }
             hr { }
@@ -134,7 +158,6 @@ private fun updateSearchTerms() {
                         val text = if (term.startsWith("-")) "Not ${term.substring(1)}" else term
                         +text
                         onClickFunction = {
-                            console.log("click", term)
                             if (term.startsWith("-")) {
                                 searchTerms[kind]?.remove(term)
                                 searchTerms[kind]?.add(term.substring(1))
@@ -156,6 +179,70 @@ private fun updateSearchTerms() {
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+private fun DIV.searchHelp() {
+    div("hidden") {
+        id = "search-help"
+        ul {
+            li { +"Search for a term in the title" }
+            li { +"Press enter to search for a specific property term" }
+            li {
+                +"Use "
+                code { +"-" }
+                +" to exclude from search"
+            }
+            li { +"Click a property to exclude/include that property" }
+        }
+        p {
+
+        }
+        table {
+            tr {
+                td { +"Term" }
+                td { +"Explanation" }
+            }
+            tr {
+                td { +"1234" }
+                td { +"Search mod id" }
+            }
+            tr {
+                td { +"Better" }
+                td {
+                    +"Show all mods with "
+                    code { +"better" }
+                    +" in the title"
+                }
+            }
+            tr {
+                td { +"tag:try" }
+                td {
+                    +"Show all mods tagged with the "
+                    code { +"try" }
+                    +" tag"
+                }
+            }
+            tr {
+                td { +"category:misc" }
+                td {
+                    +"Show all mods in a category whose name contains "
+                    code { +"misc" }
+                }
+            }
+            tr {
+                td { +"enabled" }
+                td { +"Show only enabled mods" }
+            }
+            tr {
+                td { +"-endorsed" }
+                td { +"Exclude endorsed mods" }
+            }
+            tr {
+                td { +"missing" }
+                td { +"Show mods that lack ana id" }
             }
         }
     }
