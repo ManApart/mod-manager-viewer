@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    kotlin("plugin.serialization") version "2.0.0"
+    kotlin("multiplatform") version "2.3.20"
+    kotlin("plugin.serialization") version "2.3.20"
 }
 
 kotlin {
