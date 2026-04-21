@@ -16,146 +16,189 @@ fun controlsMenu() {
         val mods = getMods().associateBy { it.uniqueId() }
         div {
             id = "controls"
-            div("control-row") {
-                button {
-                    img(classes = "icon", src = "./assets/filter.svg") { }
-                    +"Enabled"
-                    onClickFunction = {
-                        searchTerms[SearchType.PROPERTY]?.add("enabled")
+            profileRow()
+            filterRow(mods)
+            sortRow(mods)
+            searchRow(mods)
+            hr { }
+        }
+    }
+}
+
+private fun DIV.profileRow() {
+    div("control-row") {
+        span("control-label") {
+            +"Profile:"
+        }
+        select {
+            id = "profile-select"
+
+            getProfiles().forEach {
+                option { +it.name }
+            }
+            onChangeFunction = {
+                val select = el<HTMLSelectElement>("profile-select")
+                select.selectedOptions[0]?.textContent?.let { name ->
+                    val profile = getProfiles().first { it.name == name }
+                    getMods().forEach { mod ->
+                        val enabled = profile.ids.contains(mod.id) || profile.filePaths.contains(mod.filePath)
+                        mod.enabled = enabled
+                    }
+                    modListView()
+                }
+            }
+        }
+    }
+}
+
+private fun DIV.filterRow(mods: Map<String, Mod>) {
+    div("control-row") {
+        button {
+            img(classes = "icon", src = "./assets/filter.svg") { }
+            +"Enabled"
+            onClickFunction = {
+                searchTerms[SearchType.PROPERTY]?.add("enabled")
+                updateSearchTerms()
+                searchMods(mods)
+            }
+        }
+        button {
+            img(classes = "icon", src = "./assets/filter.svg") { }
+            +"Endorsed"
+            onClickFunction = {
+                searchTerms[SearchType.PROPERTY]?.add("endorsed")
+                updateSearchTerms()
+                searchMods(mods)
+            }
+        }
+        select {
+            id = "category-select"
+            getCategories().entries.sortedBy { it.value }.forEach { (catId, name) ->
+                option { +name }
+            }
+            onChangeFunction = {
+                val select = el<HTMLSelectElement>("category-select")
+                select.selectedOptions[0]?.textContent?.let { term ->
+                    searchTerms[SearchType.CATEGORY]?.add(term.lowercase())
+                    updateSearchTerms()
+                    searchMods(mods)
+                }
+            }
+        }
+        select {
+            id = "tag-select"
+            val tagChoices = (getMods().flatMap { it.tags } + getChanges().tagsAdded.values.flatten()).toSet()
+            tagChoices.map { it.capitalizeWords() }.sorted().forEach { option { +it } }
+            onChangeFunction = {
+                val select = el<HTMLSelectElement>("tag-select")
+                select.selectedOptions[0]?.textContent?.let { term ->
+                    searchTerms[SearchType.TAG]?.add(term.lowercase())
+                    updateSearchTerms()
+                    searchMods(mods)
+                }
+            }
+        }
+    }
+}
+
+private fun DIV.sortRow(mods: Map<String, Mod>) {
+    div("control-row") {
+        button {
+            img(classes = "icon", src = "./assets/collapse.svg") { }
+            +"Collapse"
+            onClickFunction = {
+                mods.keys.forEach { el("$it-stats-row").addClass("minimized") }
+            }
+        }
+        button {
+            img(classes = "icon", src = "./assets/sort.svg") { }
+            +"Alpha"
+            onClickFunction = { sortMods(ModSort.ALPHA) }
+        }
+        button {
+            img(classes = "icon", src = "./assets/sort.svg") { }
+            +"Load"
+            onClickFunction = { sortMods(ModSort.LOAD) }
+        }
+        button {
+            img(classes = "icon", src = "./assets/sort.svg") { }
+            +"Category"
+            onClickFunction = { sortMods(ModSort.CATEGORY) }
+        }
+    }
+}
+
+private fun DIV.searchRow(mods: Map<String, Mod>) {
+    div("control-row") {
+        button {
+            +"?"
+            onClickFunction = {
+                val help = el("search-help")
+                if (help.hasClass("hidden")) {
+                    help.removeClass("hidden")
+                } else help.addClass("hidden")
+            }
+        }
+        span("control-label") {
+            +"Search: "
+        }
+        input(classes = "search") {
+            id = "search"
+            value = ""
+            onKeyUpFunction = { key ->
+                val search = el<HTMLInputElement>("search")
+                when {
+                    (key as KeyboardEvent).key == "Enter" -> {
+                        parseSearchTerm(search.value)
+                        search.value = ""
+                        currentSearch = ""
+                        tempTerm = null
                         updateSearchTerms()
                         searchMods(mods)
                     }
-                }
-                button {
-                    img(classes = "icon", src = "./assets/filter.svg") { }
-                    +"Endorsed"
-                    onClickFunction = {
-                        searchTerms[SearchType.PROPERTY]?.add("endorsed")
-                        updateSearchTerms()
-                        searchMods(mods)
+
+                    currentSearch.isBlank()
+                            && search.value.length == 1
+                            && search.value.toIntOrNull() == null
+                        -> {
+                        //Don't search on single character, unless number
                     }
-                }
-                select {
-                    id = "category-select"
-                    getCategories().entries.sortedBy { it.value }.forEach { (catId, name) ->
-                        option { +name }
-                    }
-                    onChangeFunction = {
-                        val select = el<HTMLSelectElement>("category-select")
-                        select.selectedOptions[0]?.textContent?.let { term ->
-                            searchTerms[SearchType.CATEGORY]?.add(term.lowercase())
-                            updateSearchTerms()
-                            searchMods(mods)
-                        }
-                    }
-                }
-                select {
-                    id = "tag-select"
-                    val tagChoices = (getMods().flatMap { it.tags } + getChanges().tagsAdded.values.flatten()).toSet()
-                    tagChoices.map { it.capitalizeWords() }.sorted().forEach { option { +it } }
-                    onChangeFunction = {
-                        val select = el<HTMLSelectElement>("tag-select")
-                        select.selectedOptions[0]?.textContent?.let { term ->
-                            searchTerms[SearchType.TAG]?.add(term.lowercase())
-                            updateSearchTerms()
-                            searchMods(mods)
-                        }
-                    }
-                }
-            }
-            div("control-row") {
-                button {
-                    img(classes = "icon", src = "./assets/collapse.svg") { }
-                    +"Collapse"
-                    onClickFunction = {
-                        mods.keys.forEach { el("$it-stats-row").addClass("minimized") }
-                    }
-                }
-                button {
-                    img(classes = "icon", src = "./assets/sort.svg") { }
-                    +"Alpha"
-                    onClickFunction = { sortMods(ModSort.ALPHA) }
-                }
-                button {
-                    img(classes = "icon", src = "./assets/sort.svg") { }
-                    +"Load"
-                    onClickFunction = { sortMods(ModSort.LOAD) }
-                }
-                button {
-                    img(classes = "icon", src = "./assets/sort.svg") { }
-                    +"Category"
-                    onClickFunction = { sortMods(ModSort.CATEGORY) }
-                }
-            }
-            div("control-row") {
-                button {
-                    +"?"
-                    onClickFunction = {
-                        val help = el("search-help")
-                        if (help.hasClass("hidden")) {
-                            help.removeClass("hidden")
-                        } else help.addClass("hidden")
-                    }
-                }
-                +"Search: "
-                input(classes = "search") {
-                    id = "search"
-                    value = ""
-                    onKeyUpFunction = { key ->
-                        val search = el<HTMLInputElement>("search")
+
+                    else -> {
+                        currentSearch = search.value
                         when {
-                            (key as KeyboardEvent).key == "Enter" -> {
-                                parseSearchTerm(search.value)
-                                search.value = ""
-                                currentSearch = ""
+                            currentSearch.isBlank() -> {
                                 tempTerm = null
-                                updateSearchTerms()
                                 searchMods(mods)
                             }
 
-                            currentSearch.isBlank()
-                                    && search.value.length == 1
-                                    && search.value.toIntOrNull() == null
-                                -> {
-                                //Don't search on single character, unless number
+                            !currentSearch.contains(":") && !searchingProperty(currentSearch) -> {
+                                tempTerm = null
+                                searchMods(mods)
                             }
 
-                            else -> {
-                                currentSearch = search.value
-                                when {
-                                    currentSearch.isBlank() -> {
-                                        tempTerm = null
-                                        searchMods(mods)
-                                    }
-                                    !currentSearch.contains(":") && !searchingProperty(currentSearch) -> {
-                                        tempTerm = null
-                                        searchMods(mods)
-                                    }
-                                    currentSearch.contains(":") && currentSearch.split(":").last().length > 1 -> {
-                                        parseTempTerm(search.value)
-                                        println(tempTerm)
-                                        searchMods(mods)
-                                    }
-                                }
+                            currentSearch.contains(":") && currentSearch.split(":").last().length > 1 -> {
+                                parseTempTerm(search.value)
+                                println(tempTerm)
+                                searchMods(mods)
                             }
                         }
+                    }
+                }
 
-                    }
-                }
-                button {
-                    +"X"
-                    onClickFunction = {
-                        val search = el<HTMLInputElement>("search")
-                        search.value = ""
-                        currentSearch = ""
-                        searchMods(mods)
-                    }
-                }
-                searchHelp()
-                div { id = "search-terms" }
             }
-            hr { }
         }
+        button {
+            +"X"
+            onClickFunction = {
+                val search = el<HTMLInputElement>("search")
+                search.value = ""
+                currentSearch = ""
+                searchMods(mods)
+            }
+        }
+        searchHelp()
+        div { id = "search-terms" }
     }
 }
 
