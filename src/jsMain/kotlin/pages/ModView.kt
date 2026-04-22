@@ -93,6 +93,13 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                         tagContent(mod)
                     }
                 }
+                tr {
+                    td { +"Requires" }
+                    td {
+                        id = "${mod.uniqueId()}-requires"
+                        +mod.getRequiredMods().joinToString(", ") { it.name }
+                    }
+                }
             }
         }
     }

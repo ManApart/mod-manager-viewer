@@ -47,6 +47,8 @@ data class Mod(
     var enabled: Boolean = false,
     var categoryId: Int? = null,
     var endorsed: Boolean? = null,
+    val requiredIds: MutableSet<Int> = mutableSetOf(),
+    val requiredNames: MutableSet<String> = mutableSetOf(),
     val tags: MutableSet<String> = mutableSetOf(),
 ) {
     fun uniqueId(): String {
@@ -60,6 +62,8 @@ data class Mod(
     fun allTags(changes: Changes): Set<String> {
         return (tags + (changes.tagsAdded[uniqueId()] ?: emptySet())) - (changes.tagsRemoved[uniqueId()] ?: emptySet()).toSet()
     }
+
+    fun getRequiredMods() = requiredIds.mapNotNull { byId(it) } + requiredNames.mapNotNull { byName(it) }
 }
 
 @Serializable

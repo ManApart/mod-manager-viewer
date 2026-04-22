@@ -1,7 +1,5 @@
 package org.manapart.pages
 
-import kotlinx.dom.addClass
-import kotlinx.dom.removeClass
 import kotlinx.html.*
 import kotlinx.html.js.button
 import kotlinx.html.js.div

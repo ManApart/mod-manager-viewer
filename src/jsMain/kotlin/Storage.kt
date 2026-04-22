@@ -50,6 +50,9 @@ fun addTag(mod: Mod, tag: String) {
     persistMemory()
 }
 
+fun byId(id: Int) = getMods().firstOrNull { it.id == id }
+fun byName(name: String, silent: Boolean = false) = getMods().firstOrNull { it.name == name }.also { if (it == null && !silent) println("No Mod found for $name") }
+
 fun getCategories() = currentGame().categories.toMap()
 
 fun saveCategories(game: GameMode, categories: Map<Int, String>) {
