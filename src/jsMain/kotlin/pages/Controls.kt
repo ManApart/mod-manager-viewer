@@ -26,25 +26,27 @@ fun controlsMenu() {
 }
 
 private fun DIV.profileRow() {
-    div("control-row") {
-        span("control-label") {
-            +"Profile:"
-        }
-        select {
-            id = "profile-select"
-
-            getProfiles().forEach {
-                option { +it.name }
+    if (getProfiles().isNotEmpty()) {
+        div("control-row") {
+            span("control-label") {
+                +"Profile:"
             }
-            onChangeFunction = {
-                val select = el<HTMLSelectElement>("profile-select")
-                select.selectedOptions[0]?.textContent?.let { name ->
-                    val profile = getProfiles().first { it.name == name }
-                    getMods().forEach { mod ->
-                        val enabled = profile.ids.contains(mod.id) || profile.filePaths.contains(mod.filePath)
-                        mod.enabled = enabled
+            select {
+                id = "profile-select"
+
+                getProfiles().forEach {
+                    option { +it.name }
+                }
+                onChangeFunction = {
+                    val select = el<HTMLSelectElement>("profile-select")
+                    select.selectedOptions[0]?.textContent?.let { name ->
+                        val profile = getProfiles().first { it.name == name }
+                        getMods().forEach { mod ->
+                            val enabled = profile.ids.contains(mod.id) || profile.filePaths.contains(mod.filePath)
+                            mod.enabled = enabled
+                        }
+                        modListView()
                     }
-                    modListView()
                 }
             }
         }
