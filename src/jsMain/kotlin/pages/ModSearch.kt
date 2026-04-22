@@ -8,7 +8,7 @@ import org.manapart.*
 import org.w3c.dom.HTMLInputElement
 
 @Serializable
-enum class SearchType { PROPERTY, NAME, CATEGORY, TAG }
+enum class SearchType { PROPERTY, NAME, CATEGORY, DEPLOY_TARGET, TAG }
 
 fun searchingProperty(search: String) = SearchType.entries.any { Entities.it.name.lowercase().contains(search.lowercase()) }
 
@@ -99,6 +99,7 @@ private fun Mod.isDisplayed(
 private fun Mod.stringSearch(terms: Map<SearchType, Set<String>>, search: String, changes: Changes): Boolean {
     return (search.isNotBlank() && name.contains(search))
             || SearchType.CATEGORY.search(terms) { category()?.lowercase()?.contains(it) ?: false }
+            || SearchType.DEPLOY_TARGET.search(terms) { deployTarget.lowercase().contains(it) }
             || SearchType.TAG.search(terms) { allTags(changes).any { tag -> tag.lowercase().contains(it) } }
             || SearchType.NAME.search(terms) { name.lowercase().contains(it) }
 }

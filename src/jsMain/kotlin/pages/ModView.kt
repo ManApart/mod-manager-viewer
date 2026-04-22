@@ -87,6 +87,15 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                     }
                 }
                 tr {
+                    td { +"Deploy Target" }
+                    td {
+                        +(mod.deployTarget)
+                        onClickFunction = {
+                            searchTerm(SearchType.DEPLOY_TARGET, mod.deployTarget.lowercase())
+                        }
+                    }
+                }
+                tr {
                     td { +"Tags" }
                     td {
                         id = "${mod.uniqueId()}-tags"

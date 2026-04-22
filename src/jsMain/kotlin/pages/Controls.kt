@@ -289,6 +289,14 @@ private fun DIV.searchHelp() {
                 }
             }
             tr {
+                td { +"deploy_target:script_extender_plugins" }
+                td {
+                    +"Show all mods the deploy to the "
+                    code { +"script_extender_plugins" }
+                    +" folder"
+                }
+            }
+            tr {
                 td { +"enabled" }
                 td { +"Show only enabled mods" }
             }
