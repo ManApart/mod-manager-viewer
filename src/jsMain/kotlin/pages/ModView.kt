@@ -122,8 +122,10 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
     val add = changes.tagsAdded[mod.uniqueId()] ?: mutableSetOf()
     (mod.tags.filter { !del.contains(it) } + add).forEach { tag ->
         span("change-item") {
-            +tag
-            onClickFunction = { searchTerm(SearchType.TAG, tag) }
+            span {
+                +tag
+                onClickFunction = { searchTerm(SearchType.TAG, tag) }
+            }
             button {
                 +"X"
                 onClickFunction = {
@@ -151,8 +153,8 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
 
 private fun tagModal(mod: Mod) {
     replaceElement("tag-modal") {
-        val excluded = mod.tags + (getChanges().tagsAdded[mod.uniqueId()] ?: setOf())
-        val tagChoices = (getMods().flatMap { it.tags } + getChanges().tagsAdded.values.flatten()).toSet() - excluded
+        val excluded = mod.tags + (getChanges().tagsAdded[mod.uniqueId()]?.map { it.lowercase() } ?: setOf())
+        val tagChoices = (getMods().flatMap { it.tags } + getChanges().tagsAdded.values.flatten()).map { it.lowercase() }.toSet() - excluded
         div {
             id = "tag-modal-content"
             tagChoices.forEach { option ->
