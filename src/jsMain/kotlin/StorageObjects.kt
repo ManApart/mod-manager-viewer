@@ -67,14 +67,25 @@ data class Mod(
     fun getRequiredMods() = requiredIds.mapNotNull { byId(it) } + requiredNames.mapNotNull { byName(it) }
 }
 
+private typealias ModId = Int
+private typealias ModIdOrName = String
+private typealias Tag = String
+
 @Serializable
 data class Changes(
-    val adds: MutableSet<Int> = mutableSetOf(),
-    val deletes: MutableSet<String> = mutableSetOf(),
-    val tagsAdded: MutableMap<String, MutableSet<String>> = mutableMapOf(),
-    val tagsRemoved: MutableMap<String, MutableSet<String>> = mutableMapOf(),
+    val adds: MutableSet<ModId> = mutableSetOf(),
+    val deletes: MutableSet<ModIdOrName> = mutableSetOf(),
+    val tagsAdded: MutableMap<ModIdOrName, MutableSet<Tag>> = mutableMapOf(),
+    val tagsRemoved: MutableMap<ModIdOrName, MutableSet<Tag>> = mutableMapOf(),
 ) {
-    fun clear(){
+    fun getAdded(mod: Mod): MutableSet<String> {
+        return tagsAdded[mod.uniqueId()]?.map { it.lowercase() }?.toMutableSet() ?: mutableSetOf()
+    }
+    fun getRemoved(mod: Mod): MutableSet<String> {
+        return tagsRemoved[mod.uniqueId()]?.map { it.lowercase() }?.toMutableSet() ?: mutableSetOf()
+    }
+
+    fun clear() {
         adds.clear()
         deletes.clear()
         tagsAdded.clear()

@@ -118,9 +118,9 @@ private fun refreshTags(mod: Mod) = replaceElement("${mod.uniqueId()}-tags") { t
 
 private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
     val changes = getChanges()
-    val del = changes.tagsRemoved[mod.uniqueId()] ?: setOf()
-    val add = changes.tagsAdded[mod.uniqueId()] ?: mutableSetOf()
-    (mod.tags.filter { !del.contains(it) } + add).forEach { tag ->
+    val del = changes.getRemoved(mod)
+    val add = changes.getAdded(mod)
+    (mod.tags.map { it.lowercase() }.filter { !del.contains(it) } + add).forEach { tag ->
         span("change-item") {
             span {
                 +tag
@@ -131,10 +131,14 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
                 onClickFunction = {
                     if (add.contains(tag)) {
                         add.remove(tag)
+                        changes.tagsAdded[mod.uniqueId()] = add
                         if (add.isEmpty()) {
                             changes.tagsAdded.remove(mod.uniqueId())
                         }
-                    } else changes.tagsRemoved[mod.uniqueId()]
+                    } else{
+                        del.add(tag)
+                        changes.tagsRemoved[mod.uniqueId()] = del
+                    }
                     refreshTags(mod)
                     changesView()
                     persistMemory()
@@ -163,6 +167,7 @@ private fun tagModal(mod: Mod) {
                     onClickFunction = {
                         addTag(mod, option)
                         refreshTags(mod)
+                        changesView()
                         replaceElement("tag-modal") {}
                         el("mod-list").removeClass("blur")
                     }

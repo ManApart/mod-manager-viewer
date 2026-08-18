@@ -43,10 +43,24 @@ fun currentGame() = inMemoryStorage.games[inMemoryStorage.currentMode]!!
 fun getProfiles() = currentGame().profiles
 fun getMods() = currentGame().mods
 fun getChanges() = currentGame().changes
-fun addTag(mod: Mod, tag: String) {
-    val added = getChanges().tagsAdded
-    if (added[mod.uniqueId()] == null) added[mod.uniqueId()] = mutableSetOf()
-    added[mod.uniqueId()]?.add(tag)
+fun addTag(mod: Mod, rawTag: String) {
+    val tag = rawTag.lowercase()
+    val changes = getChanges()
+    val del = changes.getRemoved(mod)
+    val add = changes.getAdded(mod)
+
+    if (del.contains(tag)){
+        del.remove(tag)
+        if (del.isEmpty()){
+            changes.tagsRemoved.remove(mod.uniqueId())
+        } else {
+            changes.tagsRemoved[mod.uniqueId()] = del
+        }
+    } else {
+        add.add(tag)
+        changes.tagsAdded[mod.uniqueId()] = add
+    }
+
     persistMemory()
 }
 
