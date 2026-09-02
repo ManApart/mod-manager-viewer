@@ -24,7 +24,7 @@ const val CREATION = "\uD83C\uDF0E"
 const val EXTERNAL = "\uD83E\uDE90"
 const val TRY = "\uD83D\uDD0E"
 
-fun TagConsumer<HTMLElement>.modView(mod: Mod) {
+fun TagConsumer<HTMLElement>.modView(mod: Mod, minimized: Boolean = true) {
     val changes = getChanges()
     val modIsDeleted = changes.deletes.contains(mod.uniqueId())
     val classes = if (modIsDeleted) "hidden modRow" else "modRow"
@@ -54,7 +54,8 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                 if (toggle) stats.addClass("minimized") else stats.removeClass("minimized")
             }
         }
-        div("statsRow minimized") {
+        val minimizedClass = if (minimized) "minimized" else ""
+        div("statsRow $minimizedClass") {
             id = "${mod.uniqueId()}-stats-row"
             button {
                 +"Remove"
@@ -150,13 +151,13 @@ private fun TagConsumer<HTMLElement>.tagContent(mod: Mod) {
                         if (add.isEmpty()) {
                             changes.tagsAdded.remove(mod.uniqueId())
                         }
-                    } else{
+                    } else {
                         del.add(tag)
                         changes.tagsRemoved[mod.uniqueId()] = del
                     }
-                    refreshTags(mod)
                     changesView()
                     persistMemory()
+                    replaceElement("mod-${mod.uniqueId()}") { modView(mod, false) }
                 }
             }
         }
@@ -181,7 +182,7 @@ private fun tagModal(mod: Mod) {
                     +option
                     onClickFunction = {
                         addTag(mod, option)
-                        refreshTags(mod)
+                        replaceElement("mod-${mod.uniqueId()}") { modView(mod, false) }
                         changesView()
                         replaceElement("tag-modal") {}
                         el("mod-list").removeClass("blur")
