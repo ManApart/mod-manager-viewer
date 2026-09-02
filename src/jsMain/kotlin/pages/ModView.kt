@@ -15,12 +15,24 @@ import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.events.KeyboardEvent
 
 
+const val DISABLE_TAG = "disable"
+const val CREATION_TAG = "creation"
+const val EXTERNAL_TAG = "external"
+const val TRY_TAG = "try"
+
+const val CREATION = "\uD83C\uDF0E"
+const val EXTERNAL = "\uD83E\uDE90"
+const val TRY = "\uD83D\uDD0E"
+
 fun TagConsumer<HTMLElement>.modView(mod: Mod) {
-    val modIsDeleted = getChanges().deletes.contains(mod.uniqueId())
+    val changes = getChanges()
+    val modIsDeleted = changes.deletes.contains(mod.uniqueId())
     val classes = if (modIsDeleted) "hidden modRow" else "modRow"
     div(classes) {
         id = "mod-${mod.uniqueId()}"
         val needsUpdate = if (mod.version != mod.latestVersion && mod.latestVersion != null) UPDATE else ""
+
+        val tags = (mod.tags.map { it.lowercase() } + changes.getAdded(mod)) - changes.getRemoved(mod)
         div("nameRow") {
             val enabled = if (mod.enabled) ENABLED else ""
             val endorsed = when (mod.endorsed) {
@@ -28,10 +40,13 @@ fun TagConsumer<HTMLElement>.modView(mod: Mod) {
                 false -> THUMBS_DOWN
                 else -> ""
             }
-
+            val creation = if (tags.contains(CREATION_TAG)) CREATION else ""
+            val external = if (tags.contains(EXTERNAL_TAG)) EXTERNAL else ""
+            val tryEmoji = if (tags.contains(TRY_TAG)) TRY else ""
             val deletedClass = if (modIsDeleted) "modDeleted" else ""
-            span("modName $deletedClass") { +mod.name.capitalizeWords() }
-            span("modEmojis") { +(" $enabled$endorsed$needsUpdate") }
+            val disableClass = if (tags.contains(DISABLE_TAG)) "modDisabled" else ""
+            span("modName $deletedClass $disableClass") { +mod.name.capitalizeWords() }
+            span("modEmojis") { +(" $creation$external$tryEmoji$enabled$endorsed$needsUpdate") }
 
             onClickFunction = {
                 val stats = el("${mod.uniqueId()}-stats-row")
